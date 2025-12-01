@@ -1,0 +1,146 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Cart;
+use App\Models\Product;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class CartController extends Controller
+{
+    /**
+     * Ensure only customers can interact with cart features.
+     */
+    private function ensureCustomerAccess(): ?RedirectResponse
+    {
+        if (!Auth::user()->isCustomer()) {
+            return redirect()
+                ->route('home')
+                ->with('error', 'Cart is available for customer accounts only.');
+        }
+
+        return null;
+    }
+
+    public function index()
+    {
+        if ($redirect = $this->ensureCustomerAccess()) {
+            return $redirect;
+        }
+
+        $carts = Auth::user()
+            ->carts()
+            ->with(['product.artist'])
+            ->latest()
+            ->get();
+
+        return view('cart.index', compact('carts'));
+    }
+
+    public function store(Request $request)
+    {
+        if ($redirect = $this->ensureCustomerAccess()) {
+            return $redirect;
+        }
+
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        $product = Product::findOrFail($request->product_id);
+        $availableStock = $product->stock > 0 ? $product->stock : null;
+
+        if ($availableStock !== null && $request->quantity > $availableStock) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Requested quantity exceeds available stock.');
+        }
+
+        $cart = Cart::where('user_id', Auth::id())
+            ->where('product_id', $request->product_id)
+            ->first();
+
+        $newQuantity = $request->quantity;
+
+        if ($cart) {
+            $newQuantity = $cart->quantity + $request->quantity;
+            if ($availableStock !== null && $newQuantity > $availableStock) {
+                return redirect()
+                    ->back()
+                    ->with('error', 'Adding this quantity exceeds available stock.');
+            }
+            $cart->quantity = $newQuantity;
+            $cart->save();
+        } else {
+            Cart::create([
+                'user_id' => Auth::id(),
+                'product_id' => $request->product_id,
+                'quantity' => $request->quantity,
+            ]);
+        }
+
+        return redirect()
+            ->back()
+            ->with('success', 'Product added to cart!');
+    }
+
+    public function update(Request $request, $id)
+    {
+        if ($redirect = $this->ensureCustomerAccess()) {
+            return $redirect;
+        }
+
+        $request->validate([
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        $cart = Cart::where('user_id', Auth::id())
+            ->with('product')
+            ->findOrFail($id);
+
+        $availableStock = ($cart->product && $cart->product->stock > 0)
+            ? $cart->product->stock
+            : null;
+
+        if ($availableStock !== null && $request->quantity > $availableStock) {
+            $message = "Only {$availableStock} item(s) available in stock.";
+
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message], 422);
+            }
+
+            return back()->with('error', $message);
+        }
+
+        $cart->quantity = $request->quantity;
+        $cart->save();
+
+        if ($request->expectsJson()) {
+            $lineTotal = $cart->product->price * $cart->quantity;
+
+            return response()->json([
+                'quantity' => $cart->quantity,
+                'line_total' => $lineTotal,
+                'message' => 'Cart updated successfully.',
+            ]);
+        }
+
+        return back()->with('success', 'Cart updated!');
+    }
+
+    public function destroy($id)
+    {
+        if ($redirect = $this->ensureCustomerAccess()) {
+            return $redirect;
+        }
+
+        $cart = Cart::where('user_id', Auth::id())->findOrFail($id);
+        $cart->delete();
+
+        return back()->with('success', 'Item removed from cart!');
+    }
+}
