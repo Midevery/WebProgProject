@@ -15,23 +15,19 @@ use App\Http\Controllers\ArtistController;
 use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\AdminController;
 
-// Home route
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Authentication Routes
 Route::get('/signin', [AuthController::class, 'showSignIn'])->name('signin');
 Route::post('/signin', [AuthController::class, 'signIn'])->name('signin.post');
 Route::get('/signup', [AuthController::class, 'showSignUp'])->name('signup');
 Route::post('/signup', [AuthController::class, 'signUp'])->name('signup.post');
 Route::post('/signout', [AuthController::class, 'signOut'])->name('signout');
 
-// Product Routes
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
 
-// Cart Routes (Auth required)
 Route::middleware('auth')->group(function () {
-    // Customer Dashboard
+    
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('customer.dashboard');
     
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
@@ -39,42 +35,34 @@ Route::middleware('auth')->group(function () {
     Route::put('/cart/{id}', [CartController::class, 'update'])->name('cart.update');
     Route::delete('/cart/{id}', [CartController::class, 'destroy'])->name('cart.destroy');
     
-    // Payment Routes
     Route::get('/payment', [PaymentController::class, 'index'])->name('payment.index');
     Route::post('/payment/checkout', [PaymentController::class, 'checkout'])->name('payment.checkout');
     Route::get('/payment/{orderId}', [PaymentController::class, 'show'])->name('payment.show');
     Route::post('/payment/{orderId}/process', [PaymentController::class, 'process'])->name('payment.process');
     
-    // Profile Routes
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     
-    // Shipping/Tracking Routes
     Route::get('/shipping', [ShippingController::class, 'index'])->name('shipping.index');
     Route::get('/shipping/track/{orderId}', [ShippingController::class, 'tracking'])->name('shipping.tracking');
     
-    // Wishlist Routes
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
     Route::post('/wishlist/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
     Route::delete('/wishlist/{id}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
     
-    // Comment Routes
     Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
     Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->name('comments.destroy');
 });
 
-// Artist Routes (Auth required) - Must be before public artist/{id} route
 Route::middleware(['auth'])->prefix('artist')->name('artist.')->group(function () {
     Route::get('/dashboard', [ArtistController::class, 'dashboard'])->name('dashboard');
     Route::get('/profile', [ArtistController::class, 'profile'])->name('profile');
     Route::get('/product/{productId}/analytics', [ArtistController::class, 'productAnalytics'])->name('product.analytics');
 });
 
-// Artist Profile (Public) - Must be after specific routes to avoid conflicts
 Route::get('/artist/{id}', [ArtistController::class, 'show'])->name('artist.show')->where('id', '[0-9]+');
 
-// Admin Routes
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/profile', [AdminController::class, 'profile'])->name('profile');

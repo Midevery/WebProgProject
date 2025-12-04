@@ -26,6 +26,13 @@ class WishlistController extends Controller
         }
 
         $wishlists = Auth::user()->wishlists()->with('product')->get();
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'items' => $wishlists,
+            ]);
+        }
+
         return view('wishlist.index', compact('wishlists'));
     }
 
@@ -45,7 +52,20 @@ class WishlistController extends Controller
         ]);
 
         if ($wishlist->wasRecentlyCreated) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'status' => 'added',
+                    'message' => 'Product added to wishlist!',
+                ]);
+            }
             return back()->with('success', 'Product added to wishlist!');
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'status' => 'exists',
+                'message' => 'Product already in wishlist!',
+            ]);
         }
 
         return back()->with('info', 'Product already in wishlist!');
@@ -59,6 +79,13 @@ class WishlistController extends Controller
 
         $wishlist = Wishlist::where('user_id', Auth::id())->findOrFail($id);
         $wishlist->delete();
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'status' => 'removed',
+                'message' => 'Product removed from wishlist!',
+            ]);
+        }
 
         return back()->with('success', 'Product removed from wishlist!');
     }
@@ -90,5 +117,23 @@ class WishlistController extends Controller
             ]);
             return response()->json(['status' => 'added', 'message' => 'Added to wishlist']);
         }
+    }
+
+    public function apiIndex(Request $request)
+    {
+        $request->headers->set('Accept', 'application/json');
+        return $this->index();
+    }
+
+    public function apiStore(Request $request)
+    {
+        $request->headers->set('Accept', 'application/json');
+        return $this->store($request);
+    }
+
+    public function apiDestroyApi($id)
+    {
+        request()->headers->set('Accept', 'application/json');
+        return $this->destroy($id);
     }
 }

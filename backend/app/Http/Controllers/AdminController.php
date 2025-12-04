@@ -19,9 +19,15 @@ class AdminController extends Controller
     private function checkAdmin()
     {
         if (!Auth::check()) {
+            if (request()->expectsJson()) {
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
             return redirect()->route('signin');
         }
         if (!Auth::user()->isAdmin()) {
+            if (request()->expectsJson()) {
+                return response()->json(['message' => 'Access denied'], 403);
+            }
             return redirect()->route('home')->with('error', 'Access denied');
         }
         return null;
@@ -33,19 +39,14 @@ class AdminController extends Controller
             return $redirect;
         }
         
-        // Total Orders
         $totalOrders = Order::where('status', '!=', 'cancelled')->count();
         
-        // Total Users
         $totalUsers = User::where('role', '!=', 'admin')->count();
         
-        // Total Visitors (dummy - bisa diimplementasikan dengan tracking nanti)
-        $totalVisitors = 24900; // Placeholder
+        $totalVisitors = 24900; 
         
-        // Total Sales
         $totalSales = Order::where('status', '!=', 'cancelled')->sum('total_amount');
         
-        // Revenue Growth (last 7 days)
         $revenueGrowth = Order::where('status', '!=', 'cancelled')
             ->where('created_at', '>=', now()->subDays(7))
             ->select(
@@ -56,7 +57,6 @@ class AdminController extends Controller
             ->orderBy('date')
             ->get();
         
-        // Daily Income (last 7 days)
         $dailyIncome = Order::where('status', '!=', 'cancelled')
             ->where('created_at', '>=', now()->subDays(7))
             ->select(
@@ -67,13 +67,11 @@ class AdminController extends Controller
             ->orderBy('date')
             ->get();
         
-        // Order Status Summary
         $orderStatusSummary = Order::select('status', DB::raw('count(*) as count'))
             ->groupBy('status')
             ->pluck('count', 'status')
             ->toArray();
         
-        // Top Earning Categories
         $topCategories = OrderItem::join('products', 'order_items.product_id', '=', 'products.id')
             ->join('categories', 'products.category_id', '=', 'categories.id')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
@@ -84,11 +82,24 @@ class AdminController extends Controller
             ->limit(5)
             ->get();
         
-        // Recent Orders
         $recentOrders = Order::with(['user', 'orderItems.product'])
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get();
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'totalOrders' => $totalOrders,
+                'totalUsers' => $totalUsers,
+                'totalVisitors' => $totalVisitors,
+                'totalSales' => $totalSales,
+                'revenueGrowth' => $revenueGrowth,
+                'dailyIncome' => $dailyIncome,
+                'orderStatusSummary' => $orderStatusSummary,
+                'topCategories' => $topCategories,
+                'recentOrders' => $recentOrders,
+            ]);
+        }
         
         return view('admin.dashboard', compact(
             'totalOrders',
@@ -103,6 +114,7 @@ class AdminController extends Controller
         ));
     }
 
+
     public function allProducts(Request $request)
     {
         if ($redirect = $this->checkAdmin()) {
@@ -111,7 +123,6 @@ class AdminController extends Controller
         
         $query = Product::with(['category', 'artist']);
 
-        // Search
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -120,7 +131,6 @@ class AdminController extends Controller
             });
         }
 
-        // Filter by status
         if ($request->has('status') && $request->status !== '') {
             if ($request->status === 'in_stock') {
                 $query->where('stock', '>', 10);
@@ -131,7 +141,6 @@ class AdminController extends Controller
             }
         }
 
-        // Sort
         $sortBy = $request->get('sort', 'new');
         switch ($sortBy) {
             case 'new':
@@ -156,6 +165,14 @@ class AdminController extends Controller
 
         $products = $query->paginate(15);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'products' => $products,
+                'successMessage' => session('success'),
+                'errorMessage' => session('error'),
+            ]);
+        }
+
         return view('admin.all-products', compact('products'));
     }
 
@@ -167,7 +184,14 @@ class AdminController extends Controller
         
         $categories = Category::all();
         $artists = User::where('role', 'artist')->get();
-        
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'categories' => $categories,
+                'artists' => $artists,
+            ]);
+        }
+
         return view('admin.add-product', compact('categories', 'artists'));
     }
 
@@ -199,7 +223,6 @@ class AdminController extends Controller
         $product->clicks = 0;
         $product->sales_count = 0;
 
-        // Create directory if it doesn't exist
         $uploadPath = public_path('images/products');
         if (!file_exists($uploadPath)) {
             mkdir($uploadPath, 0755, true);
@@ -209,7 +232,6 @@ class AdminController extends Controller
             $image = $request->file('image');
             $imageName = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
             
-            // Move uploaded file
             if ($image->move($uploadPath, $imageName)) {
                 $product->image = 'images/products/' . $imageName;
             } else {
@@ -220,6 +242,13 @@ class AdminController extends Controller
         }
 
         $product->save();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Product added successfully!',
+                'product' => $product,
+            ]);
+        }
 
         return redirect()->route('admin.all-products')->with('success', 'Product added successfully!');
     }
@@ -233,7 +262,15 @@ class AdminController extends Controller
         $product = Product::findOrFail($id);
         $categories = Category::all();
         $artists = User::where('role', 'artist')->get();
-        
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'product' => $product,
+                'categories' => $categories,
+                'artists' => $artists,
+            ]);
+        }
+
         return view('admin.edit-product', compact('product', 'categories', 'artists'));
     }
 
@@ -263,7 +300,6 @@ class AdminController extends Controller
         $product->category_id = $request->category_id;
         $product->artist_id = $request->artist_id;
 
-        // Create directory if it doesn't exist
         $uploadPath = public_path('images/products');
         if (!file_exists($uploadPath)) {
             mkdir($uploadPath, 0755, true);
@@ -273,9 +309,7 @@ class AdminController extends Controller
             $image = $request->file('image');
             $imageName = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
             
-            // Move uploaded file
             if ($image->move($uploadPath, $imageName)) {
-                // Delete old image if exists
                 if ($product->image && file_exists(public_path($product->image))) {
                     @unlink(public_path($product->image));
                 }
@@ -287,6 +321,13 @@ class AdminController extends Controller
         }
 
         $product->save();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Product updated successfully!',
+                'product' => $product,
+            ]);
+        }
 
         return redirect()->route('admin.all-products')->with('success', 'Product updated successfully!');
     }
@@ -311,12 +352,10 @@ class AdminController extends Controller
         
         $query = Order::with(['user', 'orderItems.product']);
 
-        // Filter by status
         if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
         }
 
-        // Search
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -331,7 +370,6 @@ class AdminController extends Controller
             });
         }
 
-        // Sort
         $sortBy = $request->get('sort', 'new');
         switch ($sortBy) {
             case 'new':
@@ -344,7 +382,6 @@ class AdminController extends Controller
 
         $orders = $query->paginate(15);
 
-        // Count by status
         $orderCounts = [
             'all' => Order::count(),
             'pending' => Order::where('status', 'pending')->count(),
@@ -353,6 +390,13 @@ class AdminController extends Controller
             'delivered' => Order::where('status', 'delivered')->count(),
             'cancelled' => Order::where('status', 'cancelled')->count(),
         ];
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'orders' => $orders,
+                'orderCounts' => $orderCounts,
+            ]);
+        }
 
         return view('admin.all-orders', compact('orders', 'orderCounts'));
     }
@@ -372,7 +416,6 @@ class AdminController extends Controller
         $order->status = $request->status;
         $order->save();
 
-        // Update shipping status
         $shipping = $order->shipping;
         if ($shipping) {
             if ($request->status === 'shipped') {
@@ -388,14 +431,12 @@ class AdminController extends Controller
                     $shipping->shipped_at = now();
                 }
                 
-                // Update seller balance when order is delivered
                 if ($oldStatus !== 'delivered') {
                     foreach ($order->orderItems as $item) {
                         $product = $item->product;
                         if ($product && $product->artist_id) {
                             $artist = User::find($product->artist_id);
                             if ($artist) {
-                                // Calculate artist earning (80% of product price, adjust as needed)
                                 $artistEarning = $item->subtotal * 0.8;
                                 $artist->balance += $artistEarning;
                                 $artist->save();
@@ -420,11 +461,9 @@ class AdminController extends Controller
             return $redirect;
         }
         
-        // Total Revenue (Gross)
         $totalRevenue = Order::where('status', '!=', 'cancelled')->sum('total_amount');
         
-        // Calculate admin net earning (cost + platform fee)
-        $platformFee = 10000; // Platform fee per item (fixed)
+        $platformFee = 10000; 
         $totalItemsSold = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
             ->where('orders.status', '!=', 'cancelled')
             ->sum('order_items.quantity');
@@ -438,9 +477,8 @@ class AdminController extends Controller
             });
         
         $totalPlatformFee = $totalItemsSold * $platformFee;
-        $adminNetEarning = $totalCost + $totalPlatformFee; // Admin gets cost + platform fee
+        $adminNetEarning = $totalCost + $totalPlatformFee; 
         
-        // Earnings by Product
         $productEarnings = OrderItem::join('products', 'order_items.product_id', '=', 'products.id')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->where('orders.status', '!=', 'cancelled')
@@ -457,7 +495,6 @@ class AdminController extends Controller
             ->orderBy('total_earning', 'desc')
             ->get();
         
-        // Calculate net earning per product for admin
         foreach ($productEarnings as $product) {
             $productCost = $product->cost ?? 0;
             $product->total_cost = $product->total_sales * $productCost;
@@ -465,7 +502,6 @@ class AdminController extends Controller
             $product->admin_net_earning = $product->total_cost + $product->platform_fee;
         }
         
-        // Earnings by Category
         $categoryEarnings = OrderItem::join('products', 'order_items.product_id', '=', 'products.id')
             ->join('categories', 'products.category_id', '=', 'categories.id')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
@@ -478,7 +514,6 @@ class AdminController extends Controller
             ->orderBy('total_earning', 'desc')
             ->get();
         
-        // Earnings by Artist
         $artistEarnings = OrderItem::join('products', 'order_items.product_id', '=', 'products.id')
             ->join('users', 'products.artist_id', '=', 'users.id')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
@@ -492,6 +527,19 @@ class AdminController extends Controller
             ->groupBy('users.id', 'users.name', 'users.username')
             ->orderBy('total_earning', 'desc')
             ->get();
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'totalRevenue' => $totalRevenue,
+                'productEarnings' => $productEarnings,
+                'categoryEarnings' => $categoryEarnings,
+                'artistEarnings' => $artistEarnings,
+                'totalCost' => $totalCost,
+                'totalPlatformFee' => $totalPlatformFee,
+                'adminNetEarning' => $adminNetEarning,
+                'platformFee' => $platformFee,
+            ]);
+        }
 
         return view('admin.earning', compact(
             'totalRevenue', 
@@ -513,7 +561,6 @@ class AdminController extends Controller
         
         $admin = Auth::user();
         
-        // Analytics for admin
         $totalProductsSold = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
             ->where('orders.status', '!=', 'cancelled')
             ->sum('order_items.quantity');
@@ -528,14 +575,65 @@ class AdminController extends Controller
         
         $totalProducts = Product::count();
         
-        // Recent sales
         $recentSales = Order::with(['user', 'orderItems.product'])
             ->where('status', '!=', 'cancelled')
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get();
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'admin' => $admin,
+                'totalProductsSold' => $totalProductsSold,
+                'totalRevenue' => $totalRevenue,
+                'totalOrders' => $totalOrders,
+                'totalUsers' => $totalUsers,
+                'totalArtists' => $totalArtists,
+                'totalProducts' => $totalProducts,
+                'recentSales' => $recentSales,
+            ]);
+        }
         
         return view('admin.profile', compact('admin', 'totalProductsSold', 'totalRevenue', 'totalOrders', 'totalUsers', 'totalArtists', 'totalProducts', 'recentSales'));
     }
+
+    // ====== API WRAPPERS FOR REACT (ADMIN) ======
+
+    public function apiDashboard(Request $request)
+    {
+        $request->headers->set('Accept', 'application/json');
+        return $this->dashboard();
+    }
+
+    public function apiAllProducts(Request $request)
+    {
+        $request->headers->set('Accept', 'application/json');
+        return $this->allProducts($request);
+    }
+
+    public function apiAddProduct(Request $request)
+    {
+        $request->headers->set('Accept', 'application/json');
+        return $this->addProduct();
+    }
+
+    public function apiStoreProduct(Request $request)
+    {
+        $request->headers->set('Accept', 'application/json');
+        return $this->storeProduct($request);
+    }
+
+    public function apiEditProduct(Request $request, $id)
+    {
+        $request->headers->set('Accept', 'application/json');
+        return $this->editProduct($id);
+    }
+
+    public function apiUpdateProduct(Request $request, $id)
+    {
+        $request->headers->set('Accept', 'application/json');
+        return $this->updateProduct($request, $id);
+    }
+
 }
 

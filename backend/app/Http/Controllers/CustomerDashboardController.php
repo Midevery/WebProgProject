@@ -14,25 +14,20 @@ class CustomerDashboardController extends Controller
     {
         $user = Auth::user();
         
-        // Order in Progress (orders that are not delivered or cancelled)
         $ordersInProgress = Order::where('user_id', $user->id)
             ->whereNotIn('status', ['delivered', 'cancelled'])
             ->count();
         
-        // Total Spending This Month
         $totalSpending = Order::where('user_id', $user->id)
             ->where('status', '!=', 'cancelled')
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->sum('total_amount');
         
-        // Reward Points (dummy - bisa diimplementasikan nanti)
-        $rewardPoints = 350; // Placeholder
+        $rewardPoints = 350;
         
-        // Active Vouchers (dummy - bisa diimplementasikan nanti)
-        $activeVouchers = 2; // Placeholder
+        $activeVouchers = 2;
         
-        // Recommended Products (products user hasn't bought yet)
         $boughtProductIds = Order::where('user_id', $user->id)
             ->with('orderItems')
             ->get()
@@ -52,7 +47,6 @@ class CustomerDashboardController extends Controller
             ->pluck('product_id')
             ->toArray();
         
-        // Order Statistics
         $orderStats = Order::where('user_id', $user->id)
             ->select('status', DB::raw('count(*) as count'))
             ->groupBy('status')
@@ -63,12 +57,26 @@ class CustomerDashboardController extends Controller
         $cancelledCount = $orderStats['cancelled'] ?? 0;
         $deliveredCount = $orderStats['delivered'] ?? 0;
         
-        // Recent Orders
         $recentOrders = Order::where('user_id', $user->id)
             ->with(['orderItems.product'])
             ->orderBy('created_at', 'desc')
             ->limit(4)
             ->get();
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'ordersInProgress' => $ordersInProgress,
+                'totalSpending' => $totalSpending,
+                'rewardPoints' => $rewardPoints,
+                'activeVouchers' => $activeVouchers,
+                'recommendedProducts' => $recommendedProducts,
+                'ongoingCount' => $ongoingCount,
+                'cancelledCount' => $cancelledCount,
+                'deliveredCount' => $deliveredCount,
+                'recentOrders' => $recentOrders,
+                'wishlistProductIds' => $wishlistProductIds,
+            ]);
+        }
         
         return view('customer.dashboard', compact(
             'ordersInProgress',
@@ -82,5 +90,11 @@ class CustomerDashboardController extends Controller
             'recentOrders',
             'wishlistProductIds'
         ));
+    }
+
+    public function apiIndex(Request $request)
+    {
+        $request->headers->set('Accept', 'application/json');
+        return $this->index();
     }
 }

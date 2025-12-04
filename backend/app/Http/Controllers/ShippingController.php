@@ -15,6 +15,12 @@ class ShippingController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        if (request()->expectsJson()) {
+            return response()->json([
+                'orders' => $orders,
+            ]);
+        }
+
         return view('shipping.index', compact('orders'));
     }
 
@@ -25,5 +31,24 @@ class ShippingController extends Controller
             ->findOrFail($orderId);
         
         return view('shipping.tracking', compact('order'));
+    }
+
+    public function apiIndex()
+    {
+        request()->headers->set('Accept', 'application/json');
+        return $this->index();
+    }
+
+    public function apiShow($orderId)
+    {
+        request()->headers->set('Accept', 'application/json');
+
+        $order = Order::with(['shipping', 'orderItems.product'])
+            ->where('user_id', Auth::id())
+            ->findOrFail($orderId);
+
+        return response()->json([
+            'order' => $order,
+        ]);
     }
 }

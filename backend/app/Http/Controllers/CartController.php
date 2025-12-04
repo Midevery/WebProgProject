@@ -36,12 +36,23 @@ class CartController extends Controller
             ->latest()
             ->get();
 
+        if (request()->expectsJson()) {
+            return response()->json([
+                'items' => $carts,
+            ]);
+        }
+
         return view('cart.index', compact('carts'));
     }
 
     public function store(Request $request)
     {
         if ($redirect = $this->ensureCustomerAccess()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Cart is available for customer accounts only.',
+                ], 403);
+            }
             return $redirect;
         }
 
@@ -54,10 +65,16 @@ class CartController extends Controller
         $availableStock = $product->stock > 0 ? $product->stock : null;
 
         if ($availableStock !== null && $request->quantity > $availableStock) {
+            $message = 'Requested quantity exceeds available stock.';
+
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message], 422);
+            }
+
             return redirect()
                 ->back()
                 ->withInput()
-                ->with('error', 'Requested quantity exceeds available stock.');
+                ->with('error', $message);
         }
 
         $cart = Cart::where('user_id', Auth::id())
@@ -69,9 +86,15 @@ class CartController extends Controller
         if ($cart) {
             $newQuantity = $cart->quantity + $request->quantity;
             if ($availableStock !== null && $newQuantity > $availableStock) {
+                $message = 'Adding this quantity exceeds available stock.';
+
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => $message], 422);
+                }
+
                 return redirect()
                     ->back()
-                    ->with('error', 'Adding this quantity exceeds available stock.');
+                    ->with('error', $message);
             }
             $cart->quantity = $newQuantity;
             $cart->save();
@@ -83,6 +106,12 @@ class CartController extends Controller
             ]);
         }
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Product added to cart!',
+            ]);
+        }
+
         return redirect()
             ->back()
             ->with('success', 'Product added to cart!');
@@ -91,6 +120,11 @@ class CartController extends Controller
     public function update(Request $request, $id)
     {
         if ($redirect = $this->ensureCustomerAccess()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Cart is available for customer accounts only.',
+                ], 403);
+            }
             return $redirect;
         }
 
@@ -134,6 +168,11 @@ class CartController extends Controller
 
     public function destroy($id)
     {
+        if (request()->expectsJson() && !Auth::user()->isCustomer()) {
+            return response()->json([
+                'message' => 'Cart is available for customer accounts only.',
+            ], 403);
+        }
         if ($redirect = $this->ensureCustomerAccess()) {
             return $redirect;
         }
@@ -141,6 +180,36 @@ class CartController extends Controller
         $cart = Cart::where('user_id', Auth::id())->findOrFail($id);
         $cart->delete();
 
+        if (request()->expectsJson()) {
+            return response()->json([
+                'message' => 'Item removed from cart!',
+            ]);
+        }
+
         return back()->with('success', 'Item removed from cart!');
+    }
+
+    public function apiIndex(Request $request)
+    {
+        $request->headers->set('Accept', 'application/json');
+        return $this->index();
+    }
+
+    public function apiStore(Request $request)
+    {
+        $request->headers->set('Accept', 'application/json');
+        return $this->store($request);
+    }
+
+    public function apiUpdate(Request $request, $id)
+    {
+        $request->headers->set('Accept', 'application/json');
+        return $this->update($request, $id);
+    }
+
+    public function apiDestroy($id)
+    {
+        request()->headers->set('Accept', 'application/json');
+        return $this->destroy($id);
     }
 }

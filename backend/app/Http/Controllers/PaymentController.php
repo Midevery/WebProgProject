@@ -104,6 +104,22 @@ class PaymentController extends Controller
 
         $isPartialSelection = count($selectedCartIds) < Auth::user()->carts()->count();
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'carts' => $carts,
+                'subtotal' => $subtotal,
+                'adminFee' => $adminFee,
+                'ppn' => $ppn,
+                'total' => $total,
+                'selectedCartIds' => $selectedCartIds,
+                'isPartialSelection' => $isPartialSelection,
+                'shippingOptions' => $shippingOptions,
+                'currentShipping' => $currentShipping,
+                'shippingPrice' => $shippingPrice,
+                'taxRate' => $taxRate,
+            ]);
+        }
+
         return view('payment.index', compact(
             'carts',
             'subtotal',
@@ -134,6 +150,12 @@ class PaymentController extends Controller
         $carts = $this->fetchSelectedCarts($selectedCartIds);
         
         if ($carts->isEmpty()) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Please select at least one item to purchase.',
+                ], 422);
+            }
+
             return redirect()->route('cart.index')->with('error', 'Please select at least one item to purchase.');
         }
 
@@ -157,7 +179,6 @@ class PaymentController extends Controller
         $voucher = $request->voucher ? 20000 : 0;
         $total = $subtotal + $adminFee + $ppn + $shippingPrice - $voucher;
 
-        // Create order
         $order = Order::create([
             'order_number' => 'ORD-' . strtoupper(Str::random(10)),
             'user_id' => Auth::id(),
@@ -167,7 +188,6 @@ class PaymentController extends Controller
             'shipping_method' => $shippingMethod,
         ]);
 
-        // Create order items
         foreach ($carts as $cart) {
             OrderItem::create([
                 'order_id' => $order->id,
@@ -178,7 +198,6 @@ class PaymentController extends Controller
             ]);
         }
 
-        // Create payment
         $paymentMethod = $request->payment_method === 'transfer' ? 'va' : 'cash';
         $payment = Payment::create([
             'order_id' => $order->id,
@@ -187,7 +206,6 @@ class PaymentController extends Controller
             'amount' => $total,
         ]);
 
-        // Create shipping
         Shipping::create([
             'order_id' => $order->id,
             'status' => 'pending',
@@ -195,6 +213,13 @@ class PaymentController extends Controller
         ]);
 
         session()->put("order_cart_selection.{$order->id}", $selectedCartIds);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Order created',
+                'order' => $order->load(['orderItems.product', 'payment', 'shipping']),
+            ], 201);
+        }
 
         return redirect()->route('payment.show', $order->id);
     }
@@ -220,6 +245,20 @@ class PaymentController extends Controller
         $voucherAmount = 0;
         $calculatedTotal = $subtotal + $adminFee + $taxAmount + $shippingPrice - $voucherAmount;
 
+        if (request()->expectsJson()) {
+            return response()->json([
+                'order' => $order,
+                'shippingDetails' => $shippingDetails,
+                'shippingPrice' => $shippingPrice,
+                'subtotal' => $subtotal,
+                'adminFee' => $adminFee,
+                'taxAmount' => $taxAmount,
+                'taxRate' => $taxRate,
+                'voucherAmount' => $voucherAmount,
+                'calculatedTotal' => $calculatedTotal,
+            ]);
+        }
+
         return view('payment.show', compact(
             'order',
             'shippingDetails',
@@ -242,7 +281,6 @@ class PaymentController extends Controller
         $order = Order::where('user_id', Auth::id())->findOrFail($orderId);
         $payment = $order->payment;
 
-        // Dummy payment processing
         $payment->update([
             'status' => 'paid',
             'paid_at' => now(),
@@ -260,6 +298,37 @@ class PaymentController extends Controller
             Auth::user()->carts()->delete();
         }
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Payment successful!',
+                'order' => $order->fresh()->load(['payment', 'shipping', 'orderItems.product']),
+            ]);
+        }
+
         return redirect()->route('shipping.tracking', $order->id)->with('success', 'Payment successful!');
+    }
+
+    public function apiPreview(Request $request)
+    {
+        $request->headers->set('Accept', 'application/json');
+        return $this->index($request);
+    }
+
+    public function apiCheckout(Request $request)
+    {
+        $request->headers->set('Accept', 'application/json');
+        return $this->checkout($request);
+    }
+
+    public function apiShow(Request $request, $orderId)
+    {
+        $request->headers->set('Accept', 'application/json');
+        return $this->show($orderId);
+    }
+
+    public function apiProcess(Request $request, $orderId)
+    {
+        $request->headers->set('Accept', 'application/json');
+        return $this->process($request, $orderId);
     }
 }

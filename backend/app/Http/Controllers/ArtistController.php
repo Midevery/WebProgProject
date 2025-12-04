@@ -29,22 +29,26 @@ class ArtistController extends Controller
     public function dashboard()
     {
         if (!Auth::check()) {
+            if (request()->expectsJson()) {
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
             return redirect()->route('signin');
         }
         
         $artist = Auth::user();
         
         if (!$artist->isArtist()) {
+            if (request()->expectsJson()) {
+                return response()->json(['message' => 'Access denied'], 403);
+            }
             return redirect()->route('home')->with('error', 'Access denied');
         }
 
-        // Get all products by this artist
         $products = Product::where('artist_id', $artist->id)
             ->with(['category', 'orderItems.order'])
             ->get();
 
-        // Calculate sales statistics
-        $platformFee = 10000; // Platform fee per item (fixed)
+        $platformFee = 10000;
         $totalSales = OrderItem::whereHas('product', function($query) use ($artist) {
             $query->where('artist_id', $artist->id);
         })
@@ -61,7 +65,6 @@ class ArtistController extends Controller
         })
         ->count();
         
-        // Calculate total items sold, cost, and platform fee
         $totalItemsSold = OrderItem::whereHas('product', function($query) use ($artist) {
             $query->where('artist_id', $artist->id);
         })
@@ -70,7 +73,6 @@ class ArtistController extends Controller
         })
         ->sum('quantity');
         
-        // Calculate total cost from all products sold
         $totalCost = OrderItem::whereHas('product', function($query) use ($artist) {
             $query->where('artist_id', $artist->id);
         })
@@ -85,7 +87,6 @@ class ArtistController extends Controller
         $totalPlatformFee = $totalItemsSold * $platformFee;
         $netSales = $totalSales - $totalCost - $totalPlatformFee;
 
-        // Get ALL products with sales data - no limit
         $productsWithSales = Product::where('artist_id', $artist->id)
             ->with(['category'])
             ->orderBy('created_at', 'desc')
@@ -101,8 +102,7 @@ class ArtistController extends Controller
             }], 'subtotal')
             ->get();
 
-        // Calculate total earnings per product with cost and platform fee
-        $platformFee = 10000; // Platform fee per item (fixed)
+        $platformFee = 10000;
         foreach ($productsWithSales as $product) {
             $product->total_earning = $product->orderItems()
                 ->whereHas('order', function($q) {
@@ -110,12 +110,23 @@ class ArtistController extends Controller
                 })
                 ->sum('subtotal');
             
-            // Calculate net earning (after cost and platform fee)
             $totalItemsSold = $product->total_sold ?? 0;
             $productCost = $product->cost ?? 0;
             $totalCost = $totalItemsSold * $productCost;
             $product->platform_fee = $totalItemsSold * $platformFee;
             $product->net_earning = $product->total_earning - $totalCost - $product->platform_fee;
+        }
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'products' => $products,
+                'totalSales' => $totalSales,
+                'totalOrders' => $totalOrders,
+                'productsWithSales' => $productsWithSales,
+                'artist' => $artist,
+                'totalPlatformFee' => $totalPlatformFee,
+                'netSales' => $netSales,
+            ]);
         }
 
         return view('artist.dashboard', compact('products', 'totalSales', 'totalOrders', 'productsWithSales', 'artist', 'totalPlatformFee', 'netSales'));
@@ -124,45 +135,45 @@ class ArtistController extends Controller
     public function profile()
     {
         if (!Auth::check()) {
+            if (request()->expectsJson()) {
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
             return redirect()->route('signin');
         }
         
         $artist = Auth::user();
         
         if (!$artist->isArtist()) {
+            if (request()->expectsJson()) {
+                return response()->json(['message' => 'Access denied'], 403);
+            }
             return redirect()->route('home')->with('error', 'Access denied');
         }
 
-        // Get ALL products by this artist with detailed analytics - no limit
         $products = Product::where('artist_id', $artist->id)
             ->with(['category'])
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // Calculate analytics for each product with cost and platform fee
-        $platformFee = 10000; // Platform fee per item (fixed)
+        $platformFee = 10000;
         foreach ($products as $product) {
-            // Total sold
             $product->total_sold = OrderItem::where('product_id', $product->id)
                 ->whereHas('order', function($q) {
                     $q->where('status', '!=', 'cancelled');
                 })
                 ->sum('quantity');
             
-            // Total earning
             $product->total_earning = OrderItem::where('product_id', $product->id)
                 ->whereHas('order', function($q) {
                     $q->where('status', '!=', 'cancelled');
                 })
                 ->sum('subtotal');
             
-            // Calculate cost, platform fee and net earning
             $productCost = $product->cost ?? 0;
             $totalCost = $product->total_sold * $productCost;
             $product->platform_fee = $product->total_sold * $platformFee;
             $product->net_earning = $product->total_earning - $totalCost - $product->platform_fee;
             
-            // Total orders
             $product->total_orders = OrderItem::where('product_id', $product->id)
                 ->whereHas('order', function($q) {
                     $q->where('status', '!=', 'cancelled');
@@ -171,7 +182,6 @@ class ArtistController extends Controller
                 ->count('order_id');
         }
 
-        // Overall statistics
         $totalSales = OrderItem::whereHas('product', function($query) use ($artist) {
             $query->where('artist_id', $artist->id);
         })
@@ -189,28 +199,41 @@ class ArtistController extends Controller
         ->distinct('order_id')
         ->count('order_id');
 
+        if (request()->expectsJson()) {
+            return response()->json([
+                'artist' => $artist,
+                'products' => $products,
+                'totalSales' => $totalSales,
+                'totalOrders' => $totalOrders,
+            ]);
+        }
+
         return view('artist.profile', compact('artist', 'products', 'totalSales', 'totalOrders'));
     }
 
     public function productAnalytics($productId)
     {
         if (!Auth::check()) {
+            if (request()->expectsJson()) {
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
             return redirect()->route('signin');
         }
         
         $artist = Auth::user();
         
         if (!$artist->isArtist()) {
+            if (request()->expectsJson()) {
+                return response()->json(['message' => 'Access denied'], 403);
+            }
             return redirect()->route('home')->with('error', 'Access denied');
         }
 
-        // Get product and verify it belongs to this artist
         $product = Product::where('id', $productId)
             ->where('artist_id', $artist->id)
             ->with(['category', 'artist'])
             ->firstOrFail();
 
-        // Get all order items for this product
         $orderItems = OrderItem::where('product_id', $product->id)
             ->with(['order.user'])
             ->whereHas('order', function($q) {
@@ -219,19 +242,16 @@ class ArtistController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // Calculate detailed statistics
         $totalSold = $orderItems->sum('quantity');
         $totalEarning = $orderItems->sum('subtotal');
         $totalOrders = $orderItems->pluck('order_id')->unique()->count();
         
-        // Calculate cost, platform fee and net earning
-        $platformFee = 10000; // Platform fee per item (fixed)
+        $platformFee = 10000;
         $productCost = $product->cost ?? 0;
         $totalCost = $totalSold * $productCost;
         $totalPlatformFee = $totalSold * $platformFee;
         $netEarning = $totalEarning - $totalCost - $totalPlatformFee;
         
-        // Sales by date (last 30 days)
         $salesByDate = OrderItem::where('product_id', $product->id)
             ->whereHas('order', function($q) {
                 $q->where('status', '!=', 'cancelled');
@@ -246,7 +266,6 @@ class ArtistController extends Controller
             ->orderBy('date', 'asc')
             ->get();
 
-        // Sales by month (last 12 months)
         $salesByMonth = OrderItem::where('product_id', $product->id)
             ->whereHas('order', function($q) {
                 $q->where('status', '!=', 'cancelled');
@@ -261,18 +280,36 @@ class ArtistController extends Controller
             ->orderBy('month', 'asc')
             ->get();
 
-        // Conversion rate (views to sales)
         $conversionRate = $product->clicks > 0 
             ? ($totalOrders / $product->clicks) * 100 
             : 0;
 
-        // Average order value
         $avgOrderValue = $totalOrders > 0 
             ? $totalEarning / $totalOrders 
             : 0;
 
-        // Recent orders
         $recentOrders = $orderItems->take(10);
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'product' => $product,
+                'orderItems' => $orderItems,
+                'totalSold' => $totalSold,
+                'totalEarning' => $totalEarning,
+                'totalOrders' => $totalOrders,
+                'salesByDate' => $salesByDate,
+                'salesByMonth' => $salesByMonth,
+                'conversionRate' => $conversionRate,
+                'avgOrderValue' => $avgOrderValue,
+                'recentOrders' => $recentOrders,
+                'artist' => $artist,
+                'platformFee' => $platformFee,
+                'totalPlatformFee' => $totalPlatformFee,
+                'netEarning' => $netEarning,
+                'totalCost' => $totalCost,
+                'productCost' => $productCost,
+            ]);
+        }
 
         return view('artist.product-analytics', compact(
             'product', 
@@ -297,12 +334,18 @@ class ArtistController extends Controller
     public function itemDetail($productId)
     {
         if (!Auth::check()) {
+            if (request()->expectsJson()) {
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
             return redirect()->route('signin');
         }
         
         $artist = Auth::user();
         
         if (!$artist->isArtist()) {
+            if (request()->expectsJson()) {
+                return response()->json(['message' => 'Access denied'], 403);
+            }
             return redirect()->route('home')->with('error', 'Access denied');
         }
 
@@ -311,7 +354,6 @@ class ArtistController extends Controller
             ->with(['category', 'orderItems.order', 'comments.user'])
             ->firstOrFail();
 
-        // Product analytics
         $totalSold = $product->orderItems()
             ->whereHas('order', function($q) {
                 $q->where('status', '!=', 'cancelled');
@@ -331,7 +373,6 @@ class ArtistController extends Controller
             ->distinct('order_id')
             ->count('order_id');
 
-        // Sales over time (last 7 days)
         $salesOverTime = OrderItem::where('product_id', $product->id)
             ->whereHas('order', function($q) {
                 $q->where('status', '!=', 'cancelled')
@@ -346,6 +387,35 @@ class ArtistController extends Controller
             ->orderBy('date')
             ->get();
 
+        if (request()->expectsJson()) {
+            return response()->json([
+                'product' => $product,
+                'totalSold' => $totalSold,
+                'totalEarning' => $totalEarning,
+                'totalBuyers' => $totalBuyers,
+                'salesOverTime' => $salesOverTime,
+                'artist' => $artist,
+            ]);
+        }
+
         return view('artist.item-detail', compact('product', 'totalSold', 'totalEarning', 'totalBuyers', 'salesOverTime', 'artist'));
+    }
+
+    public function apiDashboard(Request $request)
+    {
+        $request->headers->set('Accept', 'application/json');
+        return $this->dashboard();
+    }
+
+    public function apiProfile(Request $request)
+    {
+        $request->headers->set('Accept', 'application/json');
+        return $this->profile();
+    }
+
+    public function apiProductAnalytics(Request $request, $productId)
+    {
+        $request->headers->set('Accept', 'application/json');
+        return $this->productAnalytics($productId);
     }
 }

@@ -15,11 +15,18 @@ class CommentController extends Controller
             'comment' => 'required|string|max:1000',
         ]);
 
-        Comment::create([
+        $comment = Comment::create([
             'user_id' => Auth::id(),
             'product_id' => $request->product_id,
             'comment' => $request->comment,
         ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Comment added!',
+                'comment' => $comment->load('user'),
+            ], 201);
+        }
 
         return back()->with('success', 'Comment added!');
     }
@@ -29,6 +36,24 @@ class CommentController extends Controller
         $comment = Comment::where('user_id', Auth::id())->findOrFail($id);
         $comment->delete();
 
+        if (request()->expectsJson()) {
+            return response()->json([
+                'message' => 'Comment deleted!',
+            ]);
+        }
+
         return back()->with('success', 'Comment deleted!');
+    }
+
+    public function apiStore(Request $request)
+    {
+        $request->headers->set('Accept', 'application/json');
+        return $this->store($request);
+    }
+
+    public function apiDestroy($id)
+    {
+        request()->headers->set('Accept', 'application/json');
+        return $this->destroy($id);
     }
 }

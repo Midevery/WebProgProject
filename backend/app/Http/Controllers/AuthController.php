@@ -60,13 +60,11 @@ class AuthController extends Controller
             
             $user = Auth::user();
             
-            // Redirect based on role
             if ($user->isAdmin()) {
                 return redirect()->route('admin.dashboard');
             } elseif ($user->isArtist()) {
                 return redirect()->route('artist.dashboard');
             } else {
-                // Customer - redirect to home (which will show welcome page)
                 return redirect()->route('home');
             }
         }
@@ -102,9 +100,7 @@ class AuthController extends Controller
             'role' => 'customer',
         ];
 
-        // Handle profile image upload
         if ($request->hasFile('profile_image')) {
-            // Create directory if it doesn't exist
             $uploadPath = public_path('images/profiles');
             if (!file_exists($uploadPath)) {
                 mkdir($uploadPath, 0755, true);
@@ -121,7 +117,6 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        // Customer - redirect to customer dashboard
         return redirect()->route('customer.dashboard');
     }
 
@@ -133,5 +128,96 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('signin');
+    }
+
+    public function apiSignIn(Request $request)
+    {
+        $request->validate([
+            'login' => 'required|string',
+            'password' => 'required|string',
+        ]);
+
+        $loginField = filter_var($request->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+        $credentials = [
+            $loginField => $request->login,
+            'password' => $request->password,
+        ];
+
+        if (Auth::attempt($credentials, $request->filled('remember'))) {
+            $request->session()->regenerate();
+
+            $user = Auth::user();
+
+            return response()->json([
+                'message' => 'Signed in successfully.',
+                'user' => $user,
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'The provided credentials do not match our records.',
+        ], 422);
+    }
+
+    public function apiSignUp(Request $request)
+    {
+        $request->validate([
+            'username' => 'required|string|max:255|unique:users',
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => ['required', 'confirmed', Password::defaults()],
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string',
+            'date_of_birth' => 'nullable|date|before:today',
+            'gender' => 'nullable|in:Male,Female',
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $userData = [
+            'username' => $request->username,
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'phone' => $request->phone,
+            'address' => $request->address,
+            'date_of_birth' => $request->date_of_birth,
+            'gender' => $request->gender,
+            'role' => 'customer',
+        ];
+
+        if ($request->hasFile('profile_image')) {
+            $uploadPath = public_path('images/profiles');
+            if (!file_exists($uploadPath)) {
+                mkdir($uploadPath, 0755, true);
+            }
+
+            $image = $request->file('profile_image');
+            $imageName = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
+            $image->move($uploadPath, $imageName);
+
+            $userData['profile_image'] = 'images/profiles/' . $imageName;
+        }
+
+        $user = User::create($userData);
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        return response()->json([
+            'message' => 'Signed up successfully.',
+            'user' => $user,
+        ], 201);
+    }
+
+    public function apiSignOut(Request $request)
+    {
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return response()->json([
+            'message' => 'Signed out successfully.',
+        ]);
     }
 }
