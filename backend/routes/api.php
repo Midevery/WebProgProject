@@ -11,31 +11,20 @@ use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ShippingController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\CommentController;
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\ArtistController;
+use App\Http\Controllers\SellerController;
+use App\Http\Controllers\SellerShippingController;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Di file ini kita definisikan semua route API yang akan dipakai React.
-| Semua route ini otomatis diprefiks dengan /api oleh Laravel.
-|
-*/
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Auth for React (session-based, gunakan middleware web untuk session)
 Route::middleware('web')->group(function () {
     Route::post('/auth/signin', [AuthController::class, 'apiSignIn']);
     Route::post('/auth/signup', [AuthController::class, 'apiSignUp']);
     Route::post('/auth/signout', [AuthController::class, 'apiSignOut'])->middleware('auth');
 });
 
-// Products
 Route::get('/products', [ProductController::class, 'apiIndex']);
 Route::get('/products/{id}', [ProductController::class, 'apiShow']);
 
@@ -66,22 +55,19 @@ Route::middleware(['web', 'auth'])->group(function () {
 
     Route::post('/comments', [CommentController::class, 'apiStore']);
     Route::delete('/comments/{id}', [CommentController::class, 'apiDestroy']);
-
-    Route::prefix('admin')->group(function () {
-        Route::get('/dashboard', [AdminController::class, 'apiDashboard']);
-        Route::get('/products', [AdminController::class, 'apiAllProducts']);
-        Route::get('/products/create', [AdminController::class, 'apiAddProduct']);
-        Route::post('/products', [AdminController::class, 'apiStoreProduct']);
-        Route::get('/products/{id}/edit', [AdminController::class, 'apiEditProduct']);
-        Route::put('/products/{id}', [AdminController::class, 'apiUpdateProduct']);
-        Route::get('/orders', [AdminController::class, 'apiAllOrders']);
-        Route::get('/earning', [AdminController::class, 'apiEarning']);
-        Route::get('/profile', [AdminController::class, 'apiProfile']);
-    });
-    Route::prefix('artist')->group(function () {
-        Route::get('/dashboard', [ArtistController::class, 'apiDashboard']);
-        Route::get('/profile', [ArtistController::class, 'apiProfile']);
-        Route::get('/product/{productId}/analytics', [ArtistController::class, 'apiProductAnalytics']);
+    
+    Route::prefix('seller')->group(function () {
+        Route::get('/dashboard', [SellerController::class, 'apiDashboard']);
+        Route::get('/profile', [SellerController::class, 'apiProfile']);
+        Route::get('/products/add', [SellerController::class, 'addProduct']);
+        Route::post('/products', [SellerController::class, 'storeProduct']);
+        Route::get('/products/{id}/edit', [SellerController::class, 'editProduct']);
+        Route::put('/products/{id}', [SellerController::class, 'updateProduct']);
+        Route::delete('/products/{id}', [SellerController::class, 'deleteProduct']);
+        Route::get('/product/{productId}/analytics', [SellerController::class, 'apiProductAnalytics']);
+        Route::get('/shipping', [SellerShippingController::class, 'index']);
+        Route::get('/shipping/{orderId}', [SellerShippingController::class, 'show']);
+        Route::put('/shipping/{orderId}/status', [SellerShippingController::class, 'updateStatus']);
     });
 });
 

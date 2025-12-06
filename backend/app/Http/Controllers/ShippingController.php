@@ -21,17 +21,11 @@ class ShippingController extends Controller
             ]);
         }
 
-        return view('shipping.index', compact('orders'));
+        return response()->json([
+            'orders' => $orders,
+        ]);
     }
 
-    public function tracking($orderId)
-    {
-        $order = Order::with(['shipping', 'orderItems.product'])
-            ->where('user_id', Auth::id())
-            ->findOrFail($orderId);
-        
-        return view('shipping.tracking', compact('order'));
-    }
 
     public function apiIndex()
     {

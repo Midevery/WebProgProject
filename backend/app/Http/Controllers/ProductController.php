@@ -12,7 +12,7 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with(['category', 'artist']);
+        $query = Product::with(['category', 'seller']);
 
         if ($request->has('availability')) {
             if ($request->availability === 'ready') {
@@ -44,9 +44,9 @@ class ProductController extends Controller
             $query->whereIn('category_id', $selectedCategories);
         }
 
-        if ($request->has('illustrator') && $request->illustrator) {
-            $query->whereHas('artist', function($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->illustrator . '%');
+        if ($request->has('seller') && $request->seller) {
+            $query->whereHas('seller', function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->seller . '%');
             });
         }
 
@@ -70,7 +70,7 @@ class ProductController extends Controller
 
     public function show(Request $request, $id)
     {
-        $product = Product::with(['category', 'artist', 'comments.user'])->findOrFail($id);
+        $product = Product::with(['category', 'seller', 'comments.user'])->findOrFail($id);
         
         $product->increment('clicks');
         

@@ -32,7 +32,7 @@ class CartController extends Controller
 
         $carts = Auth::user()
             ->carts()
-            ->with(['product.artist'])
+            ->with(['product.seller'])
             ->latest()
             ->get();
 

@@ -33,10 +33,10 @@ class PaymentController extends Controller
         ];
     }
 
-    private function ensureNotArtist()
+    private function ensureNotSeller()
     {
-        if (Auth::user()->isArtist()) {
-            return redirect()->route('home')->with('error', 'Artists cannot purchase products.');
+        if (Auth::user()->isSeller()) {
+            return redirect()->route('home')->with('error', 'Sellers cannot purchase products.');
         }
 
         return null;
@@ -63,7 +63,7 @@ class PaymentController extends Controller
 
     public function index(Request $request)
     {
-        if ($redirect = $this->ensureNotArtist()) {
+        if ($redirect = $this->ensureNotSeller()) {
             return $redirect;
         }
 
@@ -137,7 +137,7 @@ class PaymentController extends Controller
 
     public function checkout(Request $request)
     {
-        if ($redirect = $this->ensureNotArtist()) {
+        if ($redirect = $this->ensureNotSeller()) {
             return $redirect;
         }
 
@@ -206,8 +206,12 @@ class PaymentController extends Controller
             'amount' => $total,
         ]);
 
+        $firstProduct = $carts->first()->product;
+        $sellerId = $firstProduct->seller_id ?? null;
+
         Shipping::create([
             'order_id' => $order->id,
+            'seller_id' => $sellerId,
             'status' => 'pending',
             'courier' => 'JNE - ' . ucfirst($shippingMethod),
         ]);

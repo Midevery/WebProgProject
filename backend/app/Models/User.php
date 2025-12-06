@@ -57,7 +57,7 @@ class User extends Authenticatable
     // Relationships
     public function products()
     {
-        return $this->hasMany(Product::class, 'artist_id');
+        return $this->hasMany(Product::class, 'seller_id');
     }
 
     public function carts()
@@ -80,15 +80,9 @@ class User extends Authenticatable
         return $this->hasMany(Comment::class);
     }
 
-    // Helper methods
-    public function isAdmin()
+    public function isSeller()
     {
-        return $this->role === 'admin';
-    }
-
-    public function isArtist()
-    {
-        return $this->role === 'artist';
+        return $this->role === 'seller';
     }
 
     public function isCustomer()

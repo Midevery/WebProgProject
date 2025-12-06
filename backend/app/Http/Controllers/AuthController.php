@@ -15,13 +15,14 @@ class AuthController extends Controller
     {
         if (Auth::check()) {
             $user = Auth::user();
-            if ($user->isAdmin()) {
-                return redirect()->route('admin.dashboard');
-            } elseif ($user->isArtist()) {
-                return redirect()->route('artist.dashboard');
+            if ($user->isSeller()) {
+                return redirect()->route('seller.dashboard');
             } else {
                 return redirect()->route('home');
             }
+        }
+        if (request()->expectsJson()) {
+            return response()->json(['message' => 'Please sign in']);
         }
         return view('auth.signin');
     }
@@ -30,13 +31,14 @@ class AuthController extends Controller
     {
         if (Auth::check()) {
             $user = Auth::user();
-            if ($user->isAdmin()) {
-                return redirect()->route('admin.dashboard');
-            } elseif ($user->isArtist()) {
-                return redirect()->route('artist.dashboard');
+            if ($user->isSeller()) {
+                return redirect()->route('seller.dashboard');
             } else {
                 return redirect()->route('home');
             }
+        }
+        if (request()->expectsJson()) {
+            return response()->json(['message' => 'Please sign up']);
         }
         return view('auth.signup');
     }
@@ -60,10 +62,8 @@ class AuthController extends Controller
             
             $user = Auth::user();
             
-            if ($user->isAdmin()) {
-                return redirect()->route('admin.dashboard');
-            } elseif ($user->isArtist()) {
-                return redirect()->route('artist.dashboard');
+            if ($user->isSeller()) {
+                return redirect()->route('seller.dashboard');
             } else {
                 return redirect()->route('home');
             }
@@ -117,6 +117,10 @@ class AuthController extends Controller
 
         Auth::login($user);
 
+        if ($user->isSeller()) {
+            return redirect()->route('seller.dashboard');
+        }
+        
         return redirect()->route('customer.dashboard');
     }
 
@@ -167,6 +171,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => ['required', 'confirmed', Password::defaults()],
+            'role' => 'required|in:customer,seller',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
             'date_of_birth' => 'nullable|date|before:today',
@@ -179,11 +184,11 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => $request->role,
             'phone' => $request->phone,
             'address' => $request->address,
             'date_of_birth' => $request->date_of_birth,
             'gender' => $request->gender,
-            'role' => 'customer',
         ];
 
         if ($request->hasFile('profile_image')) {
@@ -206,6 +211,7 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Signed up successfully.',
             'user' => $user,
+            'redirect' => $user->isSeller() ? route('seller.dashboard') : route('customer.dashboard'),
         ], 201);
     }
 
