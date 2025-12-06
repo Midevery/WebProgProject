@@ -9,6 +9,7 @@ class Shipping extends Model
 {
     protected $fillable = [
         'order_id',
+        'seller_id',
         'status',
         'tracking_number',
         'courier',
@@ -25,5 +26,10 @@ class Shipping extends Model
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
+    }
+
+    public function seller(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'seller_id');
     }
 }

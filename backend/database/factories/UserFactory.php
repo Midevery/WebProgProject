@@ -39,10 +39,10 @@ class UserFactory extends Factory
         ];
     }
 
-    public function artist(): static
+    public function seller(): static
     {
         return $this->state(fn (array $attributes) => [
-            'role' => 'artist',
+            'role' => 'seller',
             'balance' => fake()->numberBetween(0, 1000000),
         ]);
     }

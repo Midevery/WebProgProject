@@ -12,7 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // Check if column doesn't exist before adding
             if (!Schema::hasColumn('users', 'username')) {
                 $table->string('username')->unique()->after('id');
             }
@@ -29,10 +28,10 @@ return new class extends Migration
                 $table->enum('gender', ['Male', 'Female'])->nullable()->after('date_of_birth');
             }
             if (!Schema::hasColumn('users', 'role')) {
-                $table->enum('role', ['customer', 'artist', 'admin'])->default('customer')->after('gender');
+                $table->enum('role', ['customer', 'seller'])->default('customer')->after('gender');
             }
             if (!Schema::hasColumn('users', 'balance')) {
-                $table->decimal('balance', 15, 2)->default(0)->after('role')->comment('For artists - their earnings balance');
+                $table->decimal('balance', 15, 2)->default(0)->after('role')->comment('For sellers - their earnings balance');
             }
         });
     }

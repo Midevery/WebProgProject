@@ -15,7 +15,7 @@ class Product extends Model
         'stock',
         'image',
         'category_id',
-        'artist_id',
+        'seller_id',
         'clicks',
         'sales_count',
     ];
@@ -30,9 +30,9 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
-    public function artist(): BelongsTo
+    public function seller(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'artist_id');
+        return $this->belongsTo(User::class, 'seller_id');
     }
 
     public function carts()

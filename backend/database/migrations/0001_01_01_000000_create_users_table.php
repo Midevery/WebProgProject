@@ -22,8 +22,8 @@ return new class extends Migration
             $table->text('address')->nullable();
             $table->date('date_of_birth')->nullable();
             $table->enum('gender', ['Male', 'Female'])->nullable();
-            $table->enum('role', ['customer', 'artist', 'admin'])->default('customer');
-            $table->decimal('balance', 15, 2)->default(0)->comment('For artists - their earnings balance');
+            $table->enum('role', ['customer', 'seller'])->default('customer');
+            $table->decimal('balance', 15, 2)->default(0)->comment('For sellers - their earnings balance');
             $table->rememberToken();
             $table->timestamps();
         });

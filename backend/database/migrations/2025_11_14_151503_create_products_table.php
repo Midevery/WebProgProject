@@ -19,7 +19,7 @@ return new class extends Migration
             $table->integer('stock')->default(0);
             $table->string('image')->nullable();
             $table->foreignId('category_id')->constrained()->onDelete('cascade');
-            $table->foreignId('artist_id')->constrained('users')->onDelete('cascade')->comment('Seller/Artist who owns this product');
+            $table->foreignId('seller_id')->constrained('users')->onDelete('cascade')->comment('Seller who owns this product');
             $table->integer('clicks')->default(0);
             $table->integer('sales_count')->default(0);
             $table->timestamps();

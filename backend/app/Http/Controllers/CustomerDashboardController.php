@@ -37,7 +37,7 @@ class CustomerDashboardController extends Controller
             ->unique()
             ->toArray();
         
-        $recommendedProducts = Product::with(['category', 'artist'])
+        $recommendedProducts = Product::with(['category', 'seller'])
             ->whereNotIn('id', $boughtProductIds)
             ->inRandomOrder()
             ->limit(4)
