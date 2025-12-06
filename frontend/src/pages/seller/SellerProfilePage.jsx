@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../../api/client.js';
 
-function ArtistProfilePage() {
+function SellerProfilePage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ function ArtistProfilePage() {
     async function load() {
       setLoading(true);
       try {
-        const res = await api.get('/artist/profile');
+        const res = await api.get('/seller/profile');
         setData(res.data);
       } catch (err) {
         if (err.response?.status === 401) {
@@ -45,7 +45,7 @@ function ArtistProfilePage() {
     );
   }
 
-  const { artist, products = [], totalSales = 0, totalOrders = 0 } = data;
+  const { seller, products = [], totalSales = 0, totalOrders = 0 } = data;
 
   return (
     <div className="container my-5">
@@ -54,7 +54,7 @@ function ArtistProfilePage() {
         <button
           type="button"
           className="btn btn-outline-primary"
-          onClick={() => navigate('/artist/dashboard')}
+          onClick={() => navigate('/seller/dashboard')}
         >
           <i className="bi bi-arrow-left me-2" />
           Back to Dashboard
@@ -67,13 +67,13 @@ function ArtistProfilePage() {
           <div className="col-md-3 text-center mb-3">
             <img
               src={resolveImageUrl(
-                artist.profile_image,
-                `https://picsum.photos/150/150?random=${artist.id}`,
+                seller.profile_image,
+                `https://picsum.photos/150/150?random=${seller.id}`,
               )}
-              alt={artist.name}
+              alt={seller.name}
               className="profile-image mb-3"
               onError={(e) => {
-                e.currentTarget.src = `https://picsum.photos/150/150?random=${artist.id}`;
+                e.currentTarget.src = `https://picsum.photos/150/150?random=${seller.id}`;
               }}
             />
           </div>
@@ -81,22 +81,22 @@ function ArtistProfilePage() {
             <div className="row mb-3">
               <div className="col-md-6">
                 <p className="mb-1">
-                  <strong>Username:</strong> {artist.username}
+                  <strong>Username:</strong> {seller.username}
                 </p>
                 <p className="mb-1">
-                  <strong>Name:</strong> {artist.name}
+                  <strong>Name:</strong> {seller.name}
                 </p>
                 <p className="mb-1">
-                  <strong>Phone:</strong> {artist.phone || '-'}
+                  <strong>Phone:</strong> {seller.phone || '-'}
                 </p>
               </div>
               <div className="col-md-6">
                 <p className="mb-1">
-                  <strong>Email:</strong> {artist.email}
+                  <strong>Email:</strong> {seller.email}
                 </p>
                 <p className="mb-1">
                   <strong>Balance:</strong> IDR{' '}
-                  {Number(artist.balance || 0).toLocaleString('id-ID')}
+                  {Number(seller.balance || 0).toLocaleString('id-ID')}
                 </p>
               </div>
             </div>
@@ -209,7 +209,7 @@ function ArtistProfilePage() {
                     </td>
                     <td>
                       <Link
-                        to={`/artist/product/${product.id}/analytics`}
+                        to={`/seller/product/${product.id}/analytics`}
                         className="btn btn-sm btn-primary"
                       >
                         <i className="bi bi-graph-up me-1" />
@@ -227,4 +227,5 @@ function ArtistProfilePage() {
   );
 }
 
-export default ArtistProfilePage;
+export default SellerProfilePage;
+

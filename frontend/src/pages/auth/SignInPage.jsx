@@ -27,10 +27,8 @@ function SignInPage() {
     try {
       const res = await api.post('/auth/signin', form);
       const role = res.data?.user?.role;
-      if (role === 'admin') {
-        navigate('/admin/dashboard');
-      } else if (role === 'artist') {
-        navigate('/artist/dashboard');
+      if (role === 'seller') {
+        navigate('/seller/dashboard');
       } else {
         navigate('/dashboard');
       }

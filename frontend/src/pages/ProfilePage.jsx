@@ -151,6 +151,10 @@ function ProfilePage() {
       setProfileImageFile(null);
       setProfilePreview(buildProfilePreview(updatedUser.profile_image, updatedUser.id, true));
       setSuccess('Profile updated successfully!');
+      
+      // Trigger user refresh in MainLayout
+      window.dispatchEvent(new CustomEvent('userUpdated', { detail: updatedUser }));
+      
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
       const errorMsg =
@@ -205,7 +209,7 @@ function ProfilePage() {
     <div
       className="container my-4"
       style={{
-        backgroundColor: 'var(--kisora-light-blue)',
+        backgroundColor: 'var(--refurbworks-light)',
         padding: '2rem',
         borderRadius: '10px',
       }}

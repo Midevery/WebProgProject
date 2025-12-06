@@ -92,7 +92,7 @@ function DashboardPage() {
                 <div className="me-3">
                   <i
                     className="bi bi-box-arrow-up"
-                    style={{ fontSize: '2rem', color: 'var(--kisora-blue)' }}
+                    style={{ fontSize: '2rem', color: 'var(--refurbworks-primary)' }}
                   />
                 </div>
                 <div>
@@ -108,7 +108,7 @@ function DashboardPage() {
                 <div className="me-3">
                   <i
                     className="bi bi-currency-dollar"
-                    style={{ fontSize: '2rem', color: 'var(--kisora-blue)' }}
+                    style={{ fontSize: '2rem', color: 'var(--refurbworks-primary)' }}
                   />
                 </div>
                 <div>
@@ -128,7 +128,7 @@ function DashboardPage() {
                 <div className="me-3">
                   <i
                     className="bi bi-star-fill"
-                    style={{ fontSize: '2rem', color: 'var(--kisora-blue)' }}
+                    style={{ fontSize: '2rem', color: 'var(--refurbworks-primary)' }}
                   />
                 </div>
                 <div>
@@ -144,7 +144,7 @@ function DashboardPage() {
                 <div className="me-3">
                   <i
                     className="bi bi-percent"
-                    style={{ fontSize: '2rem', color: 'var(--kisora-blue)' }}
+                    style={{ fontSize: '2rem', color: 'var(--refurbworks-primary)' }}
                   />
                 </div>
                 <div>

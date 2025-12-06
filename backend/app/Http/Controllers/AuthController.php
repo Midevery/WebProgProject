@@ -120,7 +120,7 @@ class AuthController extends Controller
         if ($user->isSeller()) {
             return redirect()->route('seller.dashboard');
         }
-        
+
         return redirect()->route('customer.dashboard');
     }
 

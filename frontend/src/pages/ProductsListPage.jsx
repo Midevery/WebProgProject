@@ -7,14 +7,14 @@ function ProductsListPage() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [illustratorInput, setIllustratorInput] = useState('');
+  const [sellerInput, setSellerInput] = useState('');
   const [minPriceInput, setMinPriceInput] = useState('');
   const [maxPriceInput, setMaxPriceInput] = useState('');
 
   const availability = searchParams.get('availability') || '';
   const min_price = searchParams.get('min_price') || '';
   const max_price = searchParams.get('max_price') || '';
-  const illustrator = searchParams.get('illustrator') || '';
+  const seller = searchParams.get('seller') || '';
 
   useEffect(() => {
     async function load() {
@@ -29,11 +29,11 @@ function ProductsListPage() {
         setLoading(false);
       }
     }
-    setIllustratorInput(illustrator);
+    setSellerInput(seller);
     setMinPriceInput(min_price);
     setMaxPriceInput(max_price);
     load();
-  }, [searchParams, illustrator]);
+  }, [searchParams, seller]);
 
   const updateFilter = (key, value) => {
     const next = new URLSearchParams(searchParams);
@@ -92,7 +92,9 @@ function ProductsListPage() {
                     </div>
                     <div className="p-3">
                       <h6 className="mb-1">{product.name}</h6>
-                      <p className="text-muted small mb-1">60 x 40 cm</p>
+                      <p className="text-muted small mb-1">
+                        {product.category?.name || 'Uncategorized'}
+                      </p>
                       <p className="product-price mb-0">
                         IDR {product.price?.toLocaleString('id-ID')}
                       </p>
@@ -198,11 +200,10 @@ function ProductsListPage() {
           <div className="card mb-3">
             <div className="card-body">
               <div className="d-flex justify-content-between align-items-center mb-2">
-                <h6 className="card-title mb-0">Character &amp; Series</h6>
+                <h6 className="card-title mb-0">Product Categories</h6>
               </div>
               <p className="text-muted small mb-3">
-                Choose any combination or leave all unchecked to view every
-                character.
+                Select categories to filter products. You can check or uncheck any category.
               </p>
               <div className="category-checkboxes">
                 {categories.map((cat) => {
@@ -221,7 +222,14 @@ function ProductsListPage() {
                           );
                           const all = next.getAll('categories[]');
                           next.delete('categories[]');
-                          if (!checked) all.push(String(cat.id));
+                          if (!checked) {
+                            // Add category if not checked
+                            all.push(String(cat.id));
+                          } else {
+                            // Remove category if checked (uncheck)
+                            const filtered = all.filter((id) => id !== String(cat.id));
+                            all.splice(0, all.length, ...filtered);
+                          }
                           all
                             .filter(Boolean)
                             .forEach((id) => next.append('categories[]', id));
@@ -243,19 +251,19 @@ function ProductsListPage() {
 
           <div className="card mb-3">
             <div className="card-body">
-              <h6 className="card-title">Search Illustrator</h6>
+              <h6 className="card-title">Search Seller</h6>
               <input
                 type="text"
                 className="form-control mb-2"
-                value={illustratorInput}
-                onChange={(e) => setIllustratorInput(e.target.value)}
+                value={sellerInput}
+                onChange={(e) => setSellerInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
-                    updateFilter('illustrator', illustratorInput.trim());
+                    updateFilter('seller', sellerInput.trim());
                   }
                 }}
-                placeholder="Input Illustrator then press Enter"
+                placeholder="Input Seller name then press Enter"
               />
             </div>
           </div>
