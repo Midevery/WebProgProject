@@ -15,16 +15,12 @@ import PaymentPage from './pages/PaymentPage.jsx';
 import PaymentDetailPage from './pages/PaymentDetailPage.jsx';
 import ShippingPage from './pages/ShippingPage.jsx';
 import ShippingDetailPage from './pages/ShippingDetailPage.jsx';
-import AdminDashboardPage from './pages/admin/AdminDashboardPage.jsx';
-import AdminProductsPage from './pages/admin/AdminProductsPage.jsx';
-import AdminAddProductPage from './pages/admin/AdminAddProductPage.jsx';
-import AdminEditProductPage from './pages/admin/AdminEditProductPage.jsx';
-import AdminOrdersPage from './pages/admin/AdminOrdersPage.jsx';
-import AdminEarningPage from './pages/admin/AdminEarningPage.jsx';
-import AdminProfilePage from './pages/admin/AdminProfilePage.jsx';
-import ArtistDashboardPage from './pages/artist/ArtistDashboardPage.jsx';
-import ArtistProfilePage from './pages/artist/ArtistProfilePage.jsx';
-import ArtistProductAnalyticsPage from './pages/artist/ArtistProductAnalyticsPage.jsx';
+import SellerDashboardPage from './pages/seller/SellerDashboardPage.jsx';
+import SellerProfilePage from './pages/seller/SellerProfilePage.jsx';
+import SellerProductAnalyticsPage from './pages/seller/SellerProductAnalyticsPage.jsx';
+import SellerAddProductPage from './pages/seller/SellerAddProductPage.jsx';
+import SellerEditProductPage from './pages/seller/SellerEditProductPage.jsx';
+import SellerShippingPage from './pages/seller/SellerShippingPage.jsx';
 
 function App() {
   return (
@@ -43,23 +39,15 @@ function App() {
             <Route path="/payment/:orderId" element={<PaymentDetailPage />} />
             <Route path="/shipping" element={<ShippingPage />} />
             <Route path="/shipping/:orderId" element={<ShippingDetailPage />} />
-            {/* Admin */}
-            <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
-            <Route path="/admin/products" element={<AdminProductsPage />} />
-            <Route path="/admin/products/add" element={<AdminAddProductPage />} />
+            {/* Seller */}
+            <Route path="/seller/dashboard" element={<SellerDashboardPage />} />
+            <Route path="/seller/profile" element={<SellerProfilePage />} />
+            <Route path="/seller/products/add" element={<SellerAddProductPage />} />
+            <Route path="/seller/products/:id/edit" element={<SellerEditProductPage />} />
+            <Route path="/seller/shipping" element={<SellerShippingPage />} />
             <Route
-              path="/admin/products/:id/edit"
-              element={<AdminEditProductPage />}
-            />
-            <Route path="/admin/orders" element={<AdminOrdersPage />} />
-            <Route path="/admin/earning" element={<AdminEarningPage />} />
-            <Route path="/admin/profile" element={<AdminProfilePage />} />
-            {/* Artist */}
-            <Route path="/artist/dashboard" element={<ArtistDashboardPage />} />
-            <Route path="/artist/profile" element={<ArtistProfilePage />} />
-            <Route
-              path="/artist/product/:productId/analytics"
-              element={<ArtistProductAnalyticsPage />}
+              path="/seller/product/:productId/analytics"
+              element={<SellerProductAnalyticsPage />}
             />
           </Route>
           <Route element={<AuthLayout />}>

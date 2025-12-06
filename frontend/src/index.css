@@ -1,6 +1,9 @@
 :root {
-  --kisora-blue: #87ceeb;
-  --kisora-light-blue: #e3f2fd;
+  --refurbworks-primary: #2E7D32;
+  --refurbworks-secondary: #66BB6A;
+  --refurbworks-light: #E8F5E9;
+  --refurbworks-dark: #1B5E20;
+  --refurbworks-accent: #4CAF50;
 }
 
 body {
@@ -16,7 +19,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(180deg, #e3f2fd 0%, #bbdefb 100%);
+  background: linear-gradient(180deg, #E8F5E9 0%, #C8E6C9 100%);
 }
 
 .auth-container {
@@ -57,7 +60,7 @@ body {
   right: 50px;
   transform: translateY(-50%);
   z-index: 1;
-  color: #1976d2;
+  color: #2E7D32;
   font-size: 32px;
   font-weight: 600;
   text-align: right;
@@ -104,9 +107,9 @@ body {
 
 .auth-input:focus {
   outline: none;
-  border-color: #87ceeb;
+  border-color: #66BB6A;
   background: white;
-  box-shadow: 0 0 0 3px rgba(135, 206, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
 }
 
 .auth-checkbox-row {
@@ -125,13 +128,13 @@ body {
 }
 
 .auth-footer-text a {
-  color: #87ceeb;
+  color: #2E7D32;
   text-decoration: none;
   font-weight: 600;
 }
 
 .auth-footer-text a:hover {
-  color: #6bb6d6;
+  color: #4CAF50;
 }
 
 .auth-button-primary {
@@ -150,8 +153,8 @@ body {
 
 .auth-button-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(135, 206, 235, 0.3);
-  background: linear-gradient(135deg, #6bb6d6 0%, #5aa5c4 100%);
+  box-shadow: 0 6px 20px rgba(46, 125, 50, 0.3);
+  background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
 }
 
 .auth-button-primary:active {
@@ -173,15 +176,15 @@ body {
   }
 }
 
-.navbar-kisora {
-  background-color: var(--kisora-light-blue);
+.navbar-refurbworks {
+  background-color: var(--refurbworks-light);
   padding: 1rem 0;
   position: relative;
   z-index: 1050;
 }
 
 .navbar-brand {
-  color: var(--kisora-blue) !important;
+  color: var(--refurbworks-primary) !important;
   font-weight: 600;
   font-size: 1.5rem;
 }
@@ -215,7 +218,7 @@ body {
 }
 
 .nav-icon:hover {
-  color: var(--kisora-blue);
+  color: var(--refurbworks-primary);
 }
 
 @media (max-width: 991px) {
@@ -277,8 +280,8 @@ body {
   color: #333;
 }
 
-.footer-kisora {
-  background-color: var(--kisora-light-blue);
+.footer-refurbworks {
+  background-color: var(--refurbworks-light);
   padding: 3rem 0 2rem;
   margin-top: 4rem;
 }
@@ -297,7 +300,7 @@ body {
 }
 
 .footer-link:hover {
-  color: var(--kisora-blue);
+  color: var(--refurbworks-primary);
 }
 
 .social-icon {
@@ -308,7 +311,7 @@ body {
 }
 
 .social-icon:hover {
-  color: var(--kisora-blue);
+  color: var(--refurbworks-primary);
 }
 
 .btn-see-all {
@@ -373,7 +376,7 @@ body {
 }
 
 .product-price {
-  color: var(--kisora-blue);
+  color: var(--refurbworks-primary);
   font-weight: 600;
   font-size: 1.1rem;
 }
@@ -408,7 +411,7 @@ body {
 }
 
 .stat-card-info {
-  background: linear-gradient(135deg, #bbdefb 0%, #90caf9 100%);
+  background: linear-gradient(135deg, #C8E6C9 0%, #A5D6A7 100%);
 }
 
 .stat-value {
@@ -423,7 +426,7 @@ body {
 }
 
 .product-table th {
-  background-color: var(--kisora-light-blue);
+  background-color: var(--refurbworks-light);
   padding: 1rem;
   text-align: left;
   font-weight: 600;
@@ -488,7 +491,7 @@ body {
 
 .chart-bar {
   flex: 1;
-  background: linear-gradient(180deg, #87ceeb 0%, #e3f2fd 100%);
+  background: linear-gradient(180deg, #2E7D32 0%, #E8F5E9 100%);
   border-radius: 6px 6px 0 0;
   display: flex;
   align-items: flex-end;
@@ -515,7 +518,7 @@ body {
   width: 180px;
   height: 180px;
   border-radius: 50%;
-  background: conic-gradient(#87ceeb 0deg 360deg);
+  background: conic-gradient(#2E7D32 0deg 360deg);
 }
 
 .chart-legend {
@@ -559,7 +562,7 @@ body {
 }
 
 .timeline-marker.active {
-  background: var(--kisora-blue);
+  background: var(--refurbworks-primary);
   color: #ffffff;
 }
 
@@ -572,5 +575,5 @@ body {
 }
 
 .timeline-line.active {
-  background: var(--kisora-blue);
+  background: var(--refurbworks-primary);
 }

@@ -189,7 +189,7 @@ function PaymentDetailPage() {
                 <br />
                 Account Number: 1234567890
                 <br />
-                Account Name: Kisora Shop
+                Account Name: RefurbWorks
                 <br />
                 <small className="text-muted">
                   Please include order number in transfer description

@@ -13,6 +13,7 @@ function SignUpPage() {
     address: '',
     date_of_birth: '',
     gender: '',
+    role: 'customer', // Default to customer
   });
   const [profileImageFile, setProfileImageFile] = useState(null);
   const [profilePreview, setProfilePreview] = useState('');
@@ -56,14 +57,20 @@ function SignUpPage() {
       formData.append('email', form.email);
       formData.append('password', form.password);
       formData.append('password_confirmation', form.password_confirmation);
+      formData.append('role', form.role);
       if (form.phone) formData.append('phone', form.phone);
       if (form.address) formData.append('address', form.address);
       if (form.date_of_birth) formData.append('date_of_birth', form.date_of_birth);
       if (form.gender) formData.append('gender', form.gender);
       if (profileImageFile) formData.append('profile_image', profileImageFile);
 
-      await api.post('/auth/signup', formData);
+      const res = await api.post('/auth/signup', formData);
+      const role = res.data?.user?.role;
+      if (role === 'seller') {
+        navigate('/seller/dashboard');
+      } else {
       navigate('/dashboard');
+      }
     } catch (err) {
       const msg =
         err.response?.data?.message ||
@@ -219,6 +226,31 @@ function SignUpPage() {
             value={form.date_of_birth}
             onChange={handleChange}
           />
+        </div>
+        <div className="mb-3">
+          <label className="auth-form-label">I want to register as</label>
+          <div className="gender-group">
+            <label className="gender-option">
+              <input
+                type="radio"
+                name="role"
+                value="customer"
+                checked={form.role === 'customer'}
+                onChange={handleChange}
+              />
+              <span>Customer</span>
+            </label>
+            <label className="gender-option">
+              <input
+                type="radio"
+                name="role"
+                value="seller"
+                checked={form.role === 'seller'}
+                onChange={handleChange}
+              />
+              <span>Seller</span>
+            </label>
+          </div>
         </div>
         <div className="mb-3">
           <label className="auth-form-label">Gender</label>

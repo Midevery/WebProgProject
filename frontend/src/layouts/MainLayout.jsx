@@ -38,6 +38,21 @@ function MainLayout() {
       }
     }
     loadUser();
+    
+    // Listen for user update events
+    const handleUserUpdate = (event) => {
+      if (event.detail) {
+        setUser(event.detail);
+      } else {
+        loadUser();
+      }
+    };
+    
+    window.addEventListener('userUpdated', handleUserUpdate);
+    
+    return () => {
+      window.removeEventListener('userUpdated', handleUserUpdate);
+    };
   }, []);
 
   useEffect(() => {
@@ -64,15 +79,14 @@ function MainLayout() {
   };
 
   const isCustomer = user?.role === 'customer';
-  const isAdmin = user?.role === 'admin';
-  const isArtist = user?.role === 'artist';
+  const isSeller = user?.role === 'seller';
 
   return (
     <div className="d-flex flex-column min-vh-100">
-      <nav className="navbar navbar-expand-lg navbar-kisora">
+      <nav className="navbar navbar-expand-lg navbar-refurbworks">
         <div className="container">
           <Link className="navbar-brand" to="/">
-            Kisora
+            RefurbWorks
           </Link>
 
           <button
@@ -154,79 +168,46 @@ function MainLayout() {
                       menuOpen ? ' show' : ''
                     }`}
                   >
-                    {isAdmin && (
+                    {isSeller && (
                       <>
                         <li>
                           <Link
                             className="dropdown-item"
-                            to="/admin/dashboard"
-                            onClick={() => setMenuOpen(false)}
-                          >
-                            Admin Dashboard
-                          </Link>
-                        </li>
-                        <li>
-                          <Link
-                            className="dropdown-item"
-                            to="/admin/products"
-                            onClick={() => setMenuOpen(false)}
-                          >
-                            All Products
-                          </Link>
-                        </li>
-                        <li>
-                          <Link
-                            className="dropdown-item"
-                            to="/admin/orders"
-                            onClick={() => setMenuOpen(false)}
-                          >
-                            All Orders
-                          </Link>
-                        </li>
-                        <li>
-                          <Link
-                            className="dropdown-item"
-                            to="/admin/earning"
-                            onClick={() => setMenuOpen(false)}
-                          >
-                            Earning
-                          </Link>
-                        </li>
-                        <li>
-                          <hr className="dropdown-divider" />
-                        </li>
-                      </>
-                    )}
-                    {isArtist && (
-                      <>
-                        <li>
-                          <Link
-                            className="dropdown-item"
-                            to="/artist/dashboard"
+                            to="/seller/dashboard"
                             onClick={() => setMenuOpen(false)}
                           >
                             <i className="bi bi-speedometer2 me-2" />
-                            Artist Dashboard
+                            Seller Dashboard
                           </Link>
                         </li>
                         <li>
                           <Link
                             className="dropdown-item"
-                            to="/artist/profile"
+                            to="/seller/products/add"
+                            onClick={() => setMenuOpen(false)}
+                          >
+                            <i className="bi bi-plus-circle me-2" />
+                            Add Product
+                          </Link>
+                        </li>
+                        <li>
+                          <Link
+                            className="dropdown-item"
+                            to="/seller/shipping"
+                            onClick={() => setMenuOpen(false)}
+                          >
+                            <i className="bi bi-truck me-2" />
+                            Manage Shipping
+                          </Link>
+                        </li>
+                        <li>
+                          <Link
+                            className="dropdown-item"
+                            to="/seller/profile"
                             onClick={() => setMenuOpen(false)}
                           >
                             <i className="bi bi-person-badge me-2" />
                             Seller Profile &amp; Analytics
-                          </Link>
-                        </li>
-                        <li>
-                          <Link
-                            className="dropdown-item"
-                            to="/products"
-                            onClick={() => setMenuOpen(false)}
-                          >
-                            <i className="bi bi-box-seam me-2" />
-                            All Products
                           </Link>
                         </li>
                         <li>
@@ -333,14 +314,14 @@ function MainLayout() {
         <Outlet />
       </main>
 
-      <footer className="footer-kisora">
+      <footer className="footer-refurbworks">
         <div className="container">
           <div className="row">
             <div className="col-md-4 mb-4">
-              <h5 className="footer-title">Interact with Kisora</h5>
+              <h5 className="footer-title">Connect with RefurbWorks</h5>
               <div>
                 <a
-                  href="https://www.instagram.com/_kisoraa?igsh=MXUyeGNmZm5kbTF0dA%3D%3D&utm_source=qr"
+                  href="https://www.instagram.com"
                   className="social-icon"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -348,7 +329,7 @@ function MainLayout() {
                   <i className="bi bi-instagram" />
                 </a>
                 <a
-                  href="https://www.tiktok.com/@_kisoraa?_r=1&_t=ZS-91Y4mAMUggE"
+                  href="https://www.tiktok.com"
                   className="social-icon"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -356,7 +337,7 @@ function MainLayout() {
                   <i className="bi bi-tiktok" />
                 </a>
                 <a
-                  href="https://x.com/_Kisoraa?s=20"
+                  href="https://x.com"
                   className="social-icon"
                   target="_blank"
                   rel="noopener noreferrer"
