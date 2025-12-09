@@ -1,21 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client.js';
+import { resolveImageUrl } from '../api/media.js';
 
 function ProfilePage() {
-  const backendBaseUrl =
-    import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:8000';
-
-  const resolveImageUrl = useMemo(() => {
-    return (path, fallback) => {
-      if (!path) return fallback;
-      if (path.startsWith('http://') || path.startsWith('https://')) {
-        return path;
-      }
-      return `${backendBaseUrl}/${path.replace(/^\/+/, '')}`;
-    };
-  }, [backendBaseUrl]);
-
   const buildProfilePreview = (imagePath, userId, bustCache = false) => {
     const fallback = `https://picsum.photos/200/200?random=${userId || 'profile'}`;
     let resolved = resolveImageUrl(imagePath, fallback);

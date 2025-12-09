@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../api/client.js';
+import { useCart } from '../contexts/CartContext.jsx';
+import { resolveImageUrl } from '../api/media.js';
 
 function PaymentPage() {
   const location = useLocation();
@@ -9,6 +11,7 @@ function PaymentPage() {
   const [shippingMethod, setShippingMethod] = useState('fast');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const { refreshCartCount } = useCart();
 
   const searchParams = new URLSearchParams(location.search);
 
@@ -50,6 +53,7 @@ function PaymentPage() {
       });
       const res = await api.post('/payment/checkout', payload);
       const orderId = res.data.order.id;
+      await refreshCartCount();
       navigate(`/payment/${orderId}`);
     } catch (err) {
       alert(err.response?.data?.message || 'Checkout failed.');
@@ -101,11 +105,10 @@ function PaymentPage() {
                     <div className="row">
                       <div className="col-md-3">
                         <img
-                          src={
-                            c.product.image
-                              ? `/${c.product.image}`
-                              : `https://picsum.photos/200/200?random=${c.product.id}`
-                          }
+                          src={resolveImageUrl(
+                            c.product.image,
+                            `https://picsum.photos/200/200?random=${c.product.id}`,
+                          )}
                           className="img-fluid rounded"
                           alt={c.product.name}
                           onError={(e) => {
@@ -128,15 +131,8 @@ function PaymentPage() {
                         <p className="text-muted mb-1">
                           Character: {c.product.name}
                         </p>
-                        <p className="text-muted mb-1">
-                          Series: {c.product.category?.name || 'Unknown'}
-                        </p>
-                        <p className="text-muted mb-1">
-                          Illustrator: {c.product.artist?.name || 'Unknown'}
-                        </p>
                         <p className="product-price mt-2">
-                          IDR{' '}
-                          {c.product.price?.toLocaleString('id-ID')}
+                          IDR {Number(c.product.price || 0).toLocaleString('id-ID')}
                         </p>
                       </div>
                     </div>
@@ -191,13 +187,13 @@ function PaymentPage() {
                       items)
                     </span>
                     <strong>
-                      IDR {subtotal.toLocaleString('id-ID')}
+                      IDR {Number(subtotal || 0).toLocaleString('id-ID')}
                     </strong>
                   </div>
                   <div className="d-flex justify-content-between">
                     <span>Admin Fee</span>
                     <strong>
-                      IDR {adminFee.toLocaleString('id-ID')}
+                      IDR {Number(adminFee || 0).toLocaleString('id-ID')}
                     </strong>
                   </div>
                   <div className="d-flex justify-content-between">
@@ -207,7 +203,7 @@ function PaymentPage() {
                       %)
                     </span>
                     <strong>
-                      IDR {taxAmount.toLocaleString('id-ID')}
+                      IDR {Number(taxAmount || 0).toLocaleString('id-ID')}
                     </strong>
                   </div>
                   <div className="d-flex justify-content-between">
@@ -217,13 +213,13 @@ function PaymentPage() {
                       )
                     </span>
                     <strong>
-                      IDR {shippingPrice.toLocaleString('id-ID')}
+                      IDR {Number(shippingPrice || 0).toLocaleString('id-ID')}
                     </strong>
                   </div>
                   <div className="d-flex justify-content-between mt-3">
                     <span>Total</span>
                     <strong>
-                      IDR {total.toLocaleString('id-ID')}
+                      IDR {Number(total || 0).toLocaleString('id-ID')}
                     </strong>
                   </div>
                   <small className="text-muted d-block mt-2">

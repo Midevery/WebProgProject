@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../api/client.js';
+import { resolveImageUrl } from '../api/media.js';
 
 function ProductsListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -71,11 +72,10 @@ function ProductsListPage() {
                   >
                     <div className="position-relative">
                       <img
-                        src={
-                          product.image
-                            ? `/${product.image}`
-                            : `https://picsum.photos/200/200?random=${product.id}`
-                        }
+                        src={resolveImageUrl(
+                          product.image,
+                          `https://picsum.photos/200/200?random=${product.id}`,
+                        )}
                         className="product-image"
                         alt={product.name}
                         onError={(e) => {
@@ -96,7 +96,7 @@ function ProductsListPage() {
                         {product.category?.name || 'Uncategorized'}
                       </p>
                       <p className="product-price mb-0">
-                        IDR {product.price?.toLocaleString('id-ID')}
+                        IDR {Number(product.price || 0).toLocaleString('id-ID')}
                       </p>
                     </div>
                   </Link>

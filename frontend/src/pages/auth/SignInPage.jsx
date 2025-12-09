@@ -27,6 +27,7 @@ function SignInPage() {
     try {
       const res = await api.post('/auth/signin', form);
       const role = res.data?.user?.role;
+      const allowedRoles = ['seller', 'customer'];
       if (role === 'seller') {
         navigate('/seller/dashboard');
       } else {

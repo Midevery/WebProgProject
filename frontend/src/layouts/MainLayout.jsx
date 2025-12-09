@@ -1,25 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { api } from '../api/client.js';
+import { resolveImageUrl } from '../api/media.js';
 import { useCart } from '../contexts/CartContext.jsx';
 
 function MainLayout() {
-  const backendBaseUrl =
-    import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:8000';
-
-  const resolveImageUrl = useMemo(
-    () => (path, fallback) => {
-      if (!path) return fallback;
-      if (path.startsWith('http://') || path.startsWith('https://')) {
-        return path;
-      }
-      return `${backendBaseUrl}/${path.replace(/^\/+/, '')}`;
-    },
-    [backendBaseUrl],
-  );
-
   const [user, setUser] = useState(null);
   const { cartCount, refreshCartCount } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -39,7 +26,6 @@ function MainLayout() {
     }
     loadUser();
     
-    // Listen for user update events
     const handleUserUpdate = (event) => {
       if (event.detail) {
         setUser(event.detail);

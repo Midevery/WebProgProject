@@ -1,24 +1,12 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../../api/client.js';
+import { resolveImageUrl } from '../../api/media.js';
 
 function SellerDashboardPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  
-  const backendBaseUrl =
-    import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:8000';
-
-  const resolveImageUrl = useMemo(() => {
-    return (path, fallback) => {
-      if (!path) return fallback;
-      if (path.startsWith('http://') || path.startsWith('https://')) {
-        return path;
-      }
-      return `${backendBaseUrl}/${path.replace(/^\/+/, '')}`;
-    };
-  }, [backendBaseUrl]);
 
   useEffect(() => {
     async function load() {
@@ -87,31 +75,33 @@ function SellerDashboardPage() {
 
       <div className="row mb-4">
         <div className="col-md-3 mb-3">
-          <div className="stat-card">
+          <div className="stat-card h-100">
             <div className="stat-value">
-              IDR {totalSales.toLocaleString('id-ID')}
+              IDR {Number(totalSales || 0).toLocaleString('id-ID')}
             </div>
             <div className="stat-label">Gross Sales</div>
           </div>
         </div>
         <div className="col-md-3 mb-3">
-          <div className="stat-card stat-card-warm">
-            <div className="stat-value">IDR 0</div>
+          <div className="stat-card stat-card-warm h-100">
+            <div className="stat-value">
+              IDR {Number(0).toLocaleString('id-ID')}
+            </div>
             <div className="stat-label">Total Cost</div>
           </div>
         </div>
         <div className="col-md-3 mb-3">
-          <div className="stat-card stat-card-danger">
+          <div className="stat-card stat-card-danger h-100">
             <div className="stat-value">
-              IDR {totalPlatformFee.toLocaleString('id-ID')}
+              IDR {Number(totalPlatformFee || 0).toLocaleString('id-ID')}
             </div>
             <div className="stat-label">Platform Fee</div>
           </div>
         </div>
         <div className="col-md-3 mb-3">
-          <div className="stat-card stat-card-success">
+          <div className="stat-card stat-card-success h-100">
             <div className="stat-value">
-              IDR {netSales.toLocaleString('id-ID')}
+              IDR {Number(netSales || 0).toLocaleString('id-ID')}
             </div>
             <div className="stat-label">Net Sales (You Receive)</div>
           </div>

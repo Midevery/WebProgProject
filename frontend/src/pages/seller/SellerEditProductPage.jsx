@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../api/client.js';
+import { resolveImageUrl } from '../../api/media.js';
 
 function SellerEditProductPage() {
   const { id } = useParams();
@@ -22,9 +23,6 @@ function SellerEditProductPage() {
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
 
-  const backendBaseUrl =
-    import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:8000';
-
   useEffect(() => {
     async function loadData() {
       try {
@@ -43,9 +41,10 @@ function SellerEditProductPage() {
         setCategories(cats || []);
         
         if (product.image) {
-          const imageUrl = product.image.startsWith('http')
-            ? product.image
-            : `${backendBaseUrl}/${product.image.replace(/^\/+/, '')}`;
+          const imageUrl = resolveImageUrl(
+            product.image,
+            `https://picsum.photos/200/200?random=${product.id}`,
+          );
           setCurrentImage(imageUrl);
           setImagePreview(imageUrl);
         }
@@ -56,7 +55,7 @@ function SellerEditProductPage() {
       }
     }
     loadData();
-  }, [id, backendBaseUrl]);
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

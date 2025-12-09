@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client.js';
+import { resolveImageUrl } from '../api/media.js';
 import { useCart } from '../contexts/CartContext.jsx';
 
 function CartPage() {
@@ -140,11 +141,10 @@ function CartPage() {
                   </div>
                   <div className="col-md-2 col-4">
                     <img
-                      src={
-                        cart.product.image
-                          ? `/${cart.product.image}`
-                          : `https://picsum.photos/150/150?random=${cart.product.id}`
-                      }
+                      src={resolveImageUrl(
+                        cart.product.image,
+                        `https://picsum.photos/150/150?random=${cart.product.id}`,
+                      )}
                       className="img-fluid rounded"
                       alt={cart.product.name}
                       onError={(e) => {
@@ -161,9 +161,8 @@ function CartPage() {
                       {cart.product.stock > 0 ? 'Ready Stock' : 'Pre-Order'}
                     </span>
                     <h5 className="mt-2">{cart.product.name}</h5>
-                    <p className="text-muted mb-1">Poster (60 x 40 cm)</p>
                     <p className="product-price mb-0">
-                      IDR {cart.product.price?.toLocaleString('id-ID')}
+              IDR {Number(cart.product.price || 0).toLocaleString('id-ID')}
                     </p>
                   </div>
                   <div className="col-md-4 text-md-end">

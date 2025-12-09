@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api/client.js';
+import { resolveImageUrl } from '../api/media.js';
 import { useCart } from '../contexts/CartContext.jsx';
 
 function ProductDetailPage() {
@@ -17,17 +18,8 @@ function ProductDetailPage() {
   const [commentSuccess, setCommentSuccess] = useState('');
   const [commentError, setCommentError] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState(null);
-
-  const backendBaseUrl =
-    import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:8000';
-
-  const resolveImageUrl = (path, fallback) => {
-    if (!path) return fallback;
-    if (path.startsWith('http://') || path.startsWith('https://')) {
-      return path;
-    }
-    return `${backendBaseUrl}/${path.replace(/^\/+/, '')}`;
-  };
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [isInCart, setIsInCart] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -39,7 +31,10 @@ function ProductDetailPage() {
         ]);
 
         if (productRes.status === 'fulfilled') {
-          setData(productRes.value.data);
+          const productData = productRes.value.data;
+          setData(productData);
+          setIsWishlisted(Boolean(productData.product?.is_in_wishlist));
+          setIsInCart(Boolean(productData.product?.is_in_cart));
         } else {
           navigate('/products');
         }
@@ -82,6 +77,7 @@ function ProductDetailPage() {
         quantity: qty,
       });
       await refreshCartCount();
+      setIsInCart(true);
       setCommentSuccess('Product added to cart successfully!');
       setTimeout(() => setCommentSuccess(''), 3000);
     } catch (err) {
@@ -230,10 +226,12 @@ function ProductDetailPage() {
                 <div className="d-flex gap-2 mb-4">
                   <button
                     type="button"
-                    className="btn btn-outline-danger"
+                    className={`btn ${isWishlisted ? 'btn-danger' : 'btn-outline-danger'}`}
+                    disabled={isWishlisted}
                     onClick={async () => {
                       try {
                         await api.post('/wishlist', { product_id: product.id });
+                        setIsWishlisted(true);
                         setCommentSuccess('Added to wishlist!');
                         setTimeout(() => setCommentSuccess(''), 3000);
                       } catch (err) {
@@ -242,14 +240,15 @@ function ProductDetailPage() {
                       }
                     }}
                   >
-                    Wishlist
+                    {isWishlisted ? 'In Wishlist' : 'Wishlist'}
                   </button>
                   <button
                     type="button"
-                    className="btn btn-primary flex-grow-1"
+                    className={`btn flex-grow-1 ${isInCart ? 'btn-success' : 'btn-primary'}`}
+                    disabled={isInCart}
                     onClick={handleAddToCart}
                   >
-                    Add to Cart
+                    {isInCart ? 'In Cart' : 'Add to Cart'}
                   </button>
                 </div>
               )}

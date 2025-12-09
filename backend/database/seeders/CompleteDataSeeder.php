@@ -51,7 +51,7 @@ class TechMarketSeeder extends Seeder
             $customers[] = User::create([
                 'username' => 'customer' . ($i + 1),
                 'name' => fake()->name(),
-                'email' => 'customer' . ($i + 1) . '@techmarket.com',
+                'email' => 'customer' . ($i + 1) . '@gmail.com',
                 'password' => Hash::make('customer123'),
                 'role' => 'customer',
                 'phone' => '08' . str_pad(rand(100000000, 999999999), 10, '0', STR_PAD_LEFT),

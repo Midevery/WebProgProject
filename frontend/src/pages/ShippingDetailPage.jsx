@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api/client.js';
+import { useCart } from '../contexts/CartContext.jsx';
+import { resolveImageUrl } from '../api/media.js';
 
 function ShippingDetailPage() {
   const { orderId } = useParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { refreshCartCount } = useCart();
 
   useEffect(() => {
     async function load() {
@@ -42,8 +45,11 @@ function ShippingDetailPage() {
   };
 
   const statusOrder = ['pending', 'processing', 'shipped', 'in_transit', 'delivered'];
-  const currentStatus = shipping?.status || 'pending';
-  const currentIndex = statusOrder.indexOf(currentStatus);
+  const timelineStatus =
+    shipping?.status && shipping.status !== 'pending'
+      ? shipping.status
+      : order.status || 'pending';
+  const currentIndex = statusOrder.indexOf(timelineStatus);
 
   const createdDateTime = order.created_at
     ? new Date(order.created_at).toLocaleString('en-GB', {
@@ -73,6 +79,20 @@ function ShippingDetailPage() {
       </button>
 
       <h2 className="mb-4">Track Order #{order.order_number}</h2>
+      {order.status === 'pending' && (
+        <div className="mb-3">
+          <button
+            type="button"
+            className="btn btn-success"
+            onClick={() => {
+              refreshCartCount();
+              navigate(`/payment/${order.id}`);
+            }}
+          >
+            Pay Now
+          </button>
+        </div>
+      )}
 
       {/* Order Status Timeline */}
       <div className="card mb-4">
@@ -142,7 +162,7 @@ function ShippingDetailPage() {
               </p>
               <p>
                 <strong>Total Amount:</strong> IDR{' '}
-                {order.total_amount?.toLocaleString('id-ID')}
+                {Number(order.total_amount || 0).toLocaleString('id-ID')}
               </p>
               <p>
                 <strong>Order Status:</strong>{' '}
@@ -257,11 +277,10 @@ function ShippingDetailPage() {
                     <td>
                       <div className="d-flex align-items-center">
                         <img
-                          src={
-                            item.product.image
-                              ? `/${item.product.image}`
-                              : `https://picsum.photos/60/60?random=${item.product.id}`
-                          }
+                          src={resolveImageUrl(
+                            item.product.image,
+                            `https://picsum.photos/60/60?random=${item.product.id}`,
+                          )}
                           className="rounded me-2"
                           alt={item.product.name}
                           style={{ width: 60, height: 60, objectFit: 'cover' }}
@@ -296,7 +315,7 @@ function ShippingDetailPage() {
                     Total:
                   </th>
                   <th>
-                    IDR {order.total_amount?.toLocaleString('id-ID')}
+                    IDR {Number(order.total_amount || 0).toLocaleString('id-ID')}
                   </th>
                 </tr>
               </tfoot>
