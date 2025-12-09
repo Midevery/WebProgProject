@@ -1,3 +1,16 @@
+.auth-hero {
+  min-height: 100vh;
+  background: #ffffff;
+  padding: 24px 0;
+}
+
+.mdb-signup-card {
+  border-radius: 16px;
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
 :root {
   --refurbworks-primary: #2E7D32;
   --refurbworks-secondary: #66BB6A;
@@ -74,7 +87,7 @@ body {
   padding: 40px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 450px;
+  max-width: 1200px;
   z-index: 2;
   position: relative;
 }
@@ -140,7 +153,7 @@ body {
 .auth-button-primary {
   width: 100%;
   padding: 14px;
-  background: linear-gradient(135deg, #87ceeb 0%, #6bb6d6 100%);
+  background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
   border: none;
   border-radius: 10px;
   color: #ffffff;
@@ -154,11 +167,54 @@ body {
 .auth-button-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(46, 125, 50, 0.3);
-  background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+  background: linear-gradient(135deg, #43a047 0%, #1b5e20 100%);
 }
 
 .auth-button-primary:active {
   transform: translateY(0);
+}
+
+.signin-plain {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.signin-plain .auth-title {
+  margin-bottom: 24px;
+}
+
+.signup-card {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: none;
+}
+
+.auth-two-column {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.auth-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.auth-col {
+  flex: 1 1 0;
+  min-width: 240px;
+}
+
+.auth-col textarea.auth-input {
+  min-height: 96px;
+  resize: vertical;
 }
 
 @media (max-width: 768px) {
@@ -577,3 +633,4 @@ body {
 .timeline-line.active {
   background: var(--refurbworks-primary);
 }
+

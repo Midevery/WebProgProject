@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client.js';
+import { resolveImageUrl } from '../api/media.js';
 import { useCart } from '../contexts/CartContext.jsx';
 
 function DashboardPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [wishlistSet, setWishlistSet] = useState(new Set());
+  const [feedback, setFeedback] = useState(null);
   const { refreshCartCount } = useCart();
 
   useEffect(() => {
@@ -116,7 +118,7 @@ function DashboardPage() {
                     Total Spending This Month
                   </p>
                   <h4 className="mb-0">
-                    IDR {totalSpending?.toLocaleString('id-ID')}
+                    IDR {Number(totalSpending || 0).toLocaleString('id-ID')}
                   </h4>
                 </div>
               </div>
@@ -157,6 +159,20 @@ function DashboardPage() {
         </div>
 
         <div className="col-md-9">
+          {!!feedback && (
+            <div
+              className={`alert alert-${feedback.type} alert-dismissible fade show mb-3`}
+              role="alert"
+            >
+              {feedback.message}
+              <button
+                type="button"
+                className="btn-close"
+                onClick={() => setFeedback(null)}
+                aria-label="Close"
+              />
+            </div>
+          )}
           <div className="card mb-4">
             <div className="card-body">
               <h4 className="mb-4">Recommended For You</h4>
@@ -170,11 +186,10 @@ function DashboardPage() {
                       >
                         <div className="position-relative">
                           <img
-                            src={
-                              product.image
-                                ? `/${product.image}`
-                                : `https://picsum.photos/200/200?random=${product.id}`
-                            }
+                            src={resolveImageUrl(
+                              product.image,
+                              `https://picsum.photos/200/200?random=${product.id}`,
+                            )}
                             className="product-image"
                             alt={product.name}
                             onError={(e) => {
@@ -192,7 +207,7 @@ function DashboardPage() {
                         <div className="p-3">
                           <h6 className="mb-1 small">{product.name}</h6>
                           <p className="product-price mb-2">
-                            IDR {product.price?.toLocaleString('id-ID')}
+                    IDR {Number(product.price || 0).toLocaleString('id-ID')}
                           </p>
                         </div>
                       </Link>
@@ -237,9 +252,17 @@ function DashboardPage() {
                                 quantity: 1,
                               });
                               await refreshCartCount();
-                              alert('Product added successfully');
+                              setFeedback({
+                                type: 'success',
+                                message: 'Product added successfully',
+                              });
                             } catch (err) {
-                              alert(err.response?.data?.message || 'Failed to add product to cart');
+                              setFeedback({
+                                type: 'danger',
+                                message:
+                                  err.response?.data?.message ||
+                                  'Failed to add product to cart',
+                              });
                             }
                           }}
                         >
@@ -355,11 +378,10 @@ function DashboardPage() {
                             <tr key={item.id}>
                               <td>
                                 <img
-                                  src={
-                                    item.product?.image
-                                      ? `/${item.product.image}`
-                                      : `https://picsum.photos/50/50?random=${item.product?.id}`
-                                  }
+                                  src={resolveImageUrl(
+                                    item.product?.image,
+                                    `https://picsum.photos/50/50?random=${item.product?.id}`,
+                                  )}
                                   alt={item.product?.name}
                                   className="rounded"
                                   style={{
@@ -372,7 +394,7 @@ function DashboardPage() {
                               <td>{item.product?.name}</td>
                               <td>
                                 IDR{' '}
-                                {item.price?.toLocaleString('id-ID')}
+                                {Number(item.price || 0).toLocaleString('id-ID')}
                               </td>
                               <td>
                                 <span

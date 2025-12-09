@@ -79,7 +79,6 @@ function SellerAddProductPage() {
 
       setSuccess('Product added successfully!');
       
-      // Trigger dashboard refresh
       window.dispatchEvent(new CustomEvent('productUpdated'));
       
       setTimeout(() => {

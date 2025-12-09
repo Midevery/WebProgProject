@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api/client.js';
+import { useCart } from '../contexts/CartContext.jsx';
 
 function PaymentDetailPage() {
   const { orderId } = useParams();
@@ -9,6 +10,7 @@ function PaymentDetailPage() {
   const [processing, setProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('transfer');
   const navigate = useNavigate();
+  const { refreshCartCount } = useCart();
 
   useEffect(() => {
     async function load() {
@@ -31,6 +33,7 @@ function PaymentDetailPage() {
       await api.post(`/payment/${orderId}/process`, {
         payment_method: paymentMethod,
       });
+      await refreshCartCount();
       navigate('/shipping');
     } catch (err) {
       alert(err.response?.data?.message || 'Payment process failed.');
@@ -85,8 +88,8 @@ function PaymentDetailPage() {
             {order.order_items.map((item) => (
               <p key={item.id}>
                 {item.quantity} x{' '}
-                {item.price.toLocaleString('id-ID')} = IDR{' '}
-                {item.subtotal.toLocaleString('id-ID')}
+                {Number(item.price || 0).toLocaleString('id-ID')} = IDR{' '}
+                {Number(item.subtotal || 0).toLocaleString('id-ID')}
               </p>
             ))}
           </div>
@@ -110,13 +113,13 @@ function PaymentDetailPage() {
             <div className="d-flex justify-content-between">
               <span>Subtotal</span>
               <strong>
-                IDR {subtotal.toLocaleString('id-ID')}
+                IDR {Number(subtotal || 0).toLocaleString('id-ID')}
               </strong>
             </div>
             <div className="d-flex justify-content-between">
               <span>Admin Fee</span>
               <strong>
-                IDR {adminFee.toLocaleString('id-ID')}
+                IDR {Number(adminFee || 0).toLocaleString('id-ID')}
               </strong>
             </div>
             <div className="d-flex justify-content-between">
@@ -125,13 +128,13 @@ function PaymentDetailPage() {
                 %)
               </span>
               <strong>
-                IDR {taxAmount.toLocaleString('id-ID')}
+                IDR {Number(taxAmount || 0).toLocaleString('id-ID')}
               </strong>
             </div>
             <div className="d-flex justify-content-between">
               <span>Shipping</span>
               <strong>
-                IDR {shippingPrice.toLocaleString('id-ID')}
+                IDR {Number(shippingPrice || 0).toLocaleString('id-ID')}
               </strong>
             </div>
             <hr />
@@ -140,7 +143,7 @@ function PaymentDetailPage() {
                 <strong>Total Payment:</strong>
               </span>
               <strong>
-                IDR {calculatedTotal.toLocaleString('id-ID')}
+                IDR {Number(calculatedTotal || 0).toLocaleString('id-ID')}
               </strong>
             </div>
           </div>

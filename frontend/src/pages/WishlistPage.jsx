@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client.js';
+import { resolveImageUrl } from '../api/media.js';
 
 function WishlistPage() {
   const [items, setItems] = useState([]);
@@ -78,11 +79,10 @@ function WishlistPage() {
               >
                 <div className="position-relative">
                   <img
-                    src={
-                      item.product.image
-                        ? `/${item.product.image}`
-                        : `https://picsum.photos/400/250?random=${item.product.id}`
-                    }
+                    src={resolveImageUrl(
+                      item.product.image,
+                      `https://picsum.photos/400/250?random=${item.product.id}`,
+                    )}
                     className="product-image"
                     alt={item.product.name}
                     onError={(e) => {
@@ -103,7 +103,7 @@ function WishlistPage() {
                     {item.product.category?.name || 'Figure'}
                   </p>
                   <p className="product-price mb-2">
-                    IDR {item.product.price?.toLocaleString('id-ID')}
+                    IDR {Number(item.product.price || 0).toLocaleString('id-ID')}
                   </p>
                 </div>
               </Link>

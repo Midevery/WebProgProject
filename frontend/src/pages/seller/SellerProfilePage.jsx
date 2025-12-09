@@ -1,24 +1,12 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../../api/client.js';
+import { resolveImageUrl } from '../../api/media.js';
 
 function SellerProfilePage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
-  const backendBaseUrl =
-    import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:8000';
-
-  const resolveImageUrl = useMemo(() => {
-    return (path, fallback) => {
-      if (!path) return fallback;
-      if (path.startsWith('http://') || path.startsWith('https://')) {
-        return path;
-      }
-      return `${backendBaseUrl}/${path.replace(/^\/+/, '')}`;
-    };
-  }, [backendBaseUrl]);
 
   useEffect(() => {
     async function load() {
@@ -191,21 +179,15 @@ function SellerProfilePage() {
                     <td>{product.total_orders || 0}</td>
                     <td>
                       IDR{' '}
-                      {Number(product.total_earning || 0).toLocaleString(
-                        'id-ID',
-                      )}
+                      {Number(product.total_earning || 0).toLocaleString('id-ID')}
                     </td>
                     <td>
                       IDR{' '}
-                      {Number(product.platform_fee || 0).toLocaleString(
-                        'id-ID',
-                      )}
+                      {Number(product.platform_fee || 0).toLocaleString('id-ID')}
                     </td>
                     <td>
                       IDR{' '}
-                      {Number(product.net_earning || 0).toLocaleString(
-                        'id-ID',
-                      )}
+                      {Number(product.net_earning || 0).toLocaleString('id-ID')}
                     </td>
                     <td>
                       <Link

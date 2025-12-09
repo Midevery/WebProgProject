@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../api/client.js';
+import { resolveImageUrl } from '../../api/media.js';
 
 function SellerShippingPage() {
   const [orders, setOrders] = useState([]);
@@ -8,9 +9,6 @@ function SellerShippingPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
-
-  const backendBaseUrl =
-    import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:8000';
 
   useEffect(() => {
     loadOrders();
@@ -49,14 +47,6 @@ function SellerShippingPage() {
       setError(msg);
       setTimeout(() => setError(''), 3000);
     }
-  };
-
-  const resolveImageUrl = (path) => {
-    if (!path) return 'https://picsum.photos/60/60';
-    if (path.startsWith('http://') || path.startsWith('https://')) {
-      return path;
-    }
-    return `${backendBaseUrl}/${path.replace(/^\/+/, '')}`;
   };
 
   if (loading) {
@@ -129,8 +119,11 @@ function SellerShippingPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {orders.map((order) => (
-                    <tr key={order.id}>
+                {orders.map((order) => {
+                  const statusForAction = order.shipping?.status || order.status || 'pending';
+                  
+                  return (
+                  <tr key={order.id}>
                       <td>
                         <strong>{order.order_number}</strong>
                         <br />
@@ -175,16 +168,16 @@ function SellerShippingPage() {
                       <td>
                         <span
                           className={`badge bg-${
-                            order.shipping?.status === 'delivered'
+                            statusForAction === 'delivered'
                               ? 'success'
-                              : order.shipping?.status === 'shipped'
+                              : statusForAction === 'shipped'
                                 ? 'info'
-                              : order.shipping?.status === 'processing'
+                              : statusForAction === 'processing'
                                 ? 'primary'
                                 : 'warning'
                           }`}
                         >
-                          {order.shipping?.status || order.status || 'pending'}
+                          {statusForAction}
                         </span>
                       </td>
                       <td>
@@ -203,15 +196,7 @@ function SellerShippingPage() {
                       </td>
                       <td>
                         {/* Show button for pending orders - simple check */}
-                        {order.status === 'pending' && (
-                          <ShippingForm
-                            orderId={order.id}
-                            currentStatus="pending"
-                            onUpdate={handleUpdateStatus}
-                          />
-                        )}
-                        {/* Show button for processing orders (not yet shipped) */}
-                        {order.status === 'processing' && order.shipping?.status !== 'shipped' && order.shipping?.status !== 'delivered' && (
+                        {statusForAction === 'processing' && (
                           <ShippingForm
                             orderId={order.id}
                             currentStatus="processing"
@@ -220,7 +205,7 @@ function SellerShippingPage() {
                           />
                         )}
                         {/* Show button for shipped orders to mark as delivered */}
-                        {order.shipping?.status === 'shipped' && order.status !== 'delivered' && (
+                {statusForAction === 'shipped' && order.status !== 'delivered' && (
                           <button
                             className="btn btn-sm btn-success"
                             onClick={() =>
@@ -240,8 +225,8 @@ function SellerShippingPage() {
                           <span className="badge bg-success">Delivered</span>
                         )}
                       </td>
-                    </tr>
-                  ))}
+                  </tr>
+                )})}
                 </tbody>
               </table>
             </div>

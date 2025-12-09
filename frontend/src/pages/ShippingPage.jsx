@@ -72,7 +72,7 @@ function ShippingPage() {
                   <h5>Order #{order.order_number}</h5>
                   <p className="text-muted mb-1">Date: {createdDate}</p>
                   <p className="text-muted mb-1">
-                    Total: IDR {order.total_amount?.toLocaleString('id-ID')}
+                    Total: IDR {Number(order.total_amount || 0).toLocaleString('id-ID')}
                   </p>
                   <p className="mb-0">
                     <span className={`badge bg-${badgeVariant}`}>
@@ -80,7 +80,16 @@ function ShippingPage() {
                     </span>
                   </p>
                 </div>
-                <div className="col-md-4 text-end">
+                <div className="col-md-4 text-end d-flex flex-column gap-2 align-items-end">
+                  {status === 'pending' && (
+                    <button
+                      type="button"
+                      className="btn btn-success"
+                      onClick={() => navigate(`/payment/${order.id}`)}
+                    >
+                      Pay Now
+                    </button>
+                  )}
                   <button
                     type="button"
                     className="btn btn-primary"

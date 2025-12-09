@@ -1,25 +1,13 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../api/client.js';
+import { resolveImageUrl } from '../../api/media.js';
 
 function SellerProductAnalyticsPage() {
   const { productId } = useParams();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
-  const backendBaseUrl =
-    import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:8000';
-
-  const resolveImageUrl = useMemo(() => {
-    return (path, fallback) => {
-      if (!path) return fallback;
-      if (path.startsWith('http://') || path.startsWith('https://')) {
-        return path;
-      }
-      return `${backendBaseUrl}/${path.replace(/^\/+/, '')}`;
-    };
-  }, [backendBaseUrl]);
 
   useEffect(() => {
     async function load() {
@@ -144,7 +132,7 @@ function SellerProductAnalyticsPage() {
 
       <div className="row g-3 mb-4">
         <div className="col-md-3">
-          <div className="stat-card text-center" style={{ padding: '1.5rem' }}>
+          <div className="stat-card text-center h-100" style={{ padding: '1.5rem' }}>
             <div className="stat-value" style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>
               {totalSold}
             </div>
@@ -152,7 +140,7 @@ function SellerProductAnalyticsPage() {
           </div>
         </div>
         <div className="col-md-3">
-          <div className="stat-card text-center" style={{ padding: '1.5rem' }}>
+          <div className="stat-card text-center h-100" style={{ padding: '1.5rem' }}>
             <div className="stat-value" style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>
               IDR {Number(totalEarning || 0).toLocaleString('id-ID')}
             </div>
@@ -160,7 +148,7 @@ function SellerProductAnalyticsPage() {
           </div>
         </div>
         <div className="col-md-3">
-          <div className="stat-card text-center" style={{ padding: '1.5rem' }}>
+          <div className="stat-card text-center h-100" style={{ padding: '1.5rem' }}>
             <div className="stat-value" style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>
               {totalOrders}
             </div>
@@ -168,7 +156,7 @@ function SellerProductAnalyticsPage() {
           </div>
         </div>
         <div className="col-md-3">
-          <div className="stat-card text-center" style={{ padding: '1.5rem' }}>
+          <div className="stat-card text-center h-100" style={{ padding: '1.5rem' }}>
             <div className="stat-value" style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>
               IDR {Number(netEarning || 0).toLocaleString('id-ID')}
             </div>
