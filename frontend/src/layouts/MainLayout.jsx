@@ -216,6 +216,16 @@ function MainLayout() {
                         <li>
                           <Link
                             className="dropdown-item"
+                            to="/products"
+                            onClick={() => setMenuOpen(false)}
+                          >
+                            <i className="bi bi-box-seam me-2" />
+                            Products
+                          </Link>
+                        </li>
+                        <li>
+                          <Link
+                            className="dropdown-item"
                             to="/cart"
                             onClick={() => setMenuOpen(false)}
                           >

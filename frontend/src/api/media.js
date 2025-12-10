@@ -9,3 +9,4 @@ export const resolveImageUrl = (path, fallback) => {
   return `${backendBaseUrl}/${path.replace(/^\/+/, '')}`;
 };
 
+
