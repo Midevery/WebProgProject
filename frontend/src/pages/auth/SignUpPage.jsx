@@ -73,7 +73,7 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="auth-hero">
+
       <MDBContainer fluid className="px-3 px-md-4" style={{ maxWidth: '1600px' }}>
         
 
@@ -196,16 +196,20 @@ export default function SignUpPage() {
                     <h6 className="fw-bold mb-2">Gender</h6>
                     <div className="d-flex flex-column gap-2">
                       <MDBRadio
+                        id='gender-male'
                         name="gender"
                         value="Male"
                         label="Male"
+                        labelId='gender-male'
                         checked={form.gender === 'Male'}
                         onChange={handleChange}
                       />
                       <MDBRadio
+                        id='gender-female'
                         name="gender"
                         value="Female"
                         label="Female"
+                        labelId='gender-female'
                         checked={form.gender === 'Female'}
                         onChange={handleChange}
                       />
@@ -229,17 +233,21 @@ export default function SignUpPage() {
                     <h6 className="fw-bold mb-2">Register as</h6>
                     <div className="d-flex gap-3 align-items-center">
                       <MDBRadio
+                        id='role-customer'
                         name="role"
                         value="customer"
                         label="Customer"
+                        labelId='role-customer'
                         inline
                         checked={form.role === 'customer'}
                         onChange={handleChange}
                       />
                       <MDBRadio
+                        id='role-seller'
                         name="role"
                         value="seller"
                         label="Seller"
+                        labelId='role-seller'
                         inline
                         checked={form.role === 'seller'}
                         onChange={handleChange}
@@ -268,6 +276,6 @@ export default function SignUpPage() {
           </MDBCol>
         </MDBRow>
       </MDBContainer>
-    </div>
+    
   );
 }
