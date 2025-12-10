@@ -120,16 +120,8 @@ function SellerShippingPage() {
                 </thead>
                 <tbody>
                 {orders.map((order) => {
-                  const statusFromOrder = order.status;
-                  const statusFromShipping = order.shipping?.status;
-                  const displayStatus =
-                    statusFromOrder && statusFromOrder !== 'pending'
-                      ? statusFromOrder
-                      : statusFromShipping || statusFromOrder || 'pending';
-                  const actionStatus =
-                    statusFromOrder && statusFromOrder !== 'pending'
-                      ? statusFromOrder
-                      : statusFromShipping || statusFromOrder || 'pending';
+                  const statusForAction = order.shipping?.status || order.status || 'pending';
+                  
                   return (
                   <tr key={order.id}>
                       <td>
@@ -176,16 +168,16 @@ function SellerShippingPage() {
                       <td>
                         <span
                           className={`badge bg-${
-                            displayStatus === 'delivered'
+                            statusForAction === 'delivered'
                               ? 'success'
-                              : displayStatus === 'shipped'
+                              : statusForAction === 'shipped'
                                 ? 'info'
-                              : displayStatus === 'processing'
+                              : statusForAction === 'processing'
                                 ? 'primary'
                                 : 'warning'
                           }`}
                         >
-                          {displayStatus}
+                          {statusForAction}
                         </span>
                       </td>
                       <td>
@@ -203,7 +195,8 @@ function SellerShippingPage() {
                         )}
                       </td>
                       <td>
-                        {actionStatus === 'processing' && (
+                        {/* Show button for pending orders - simple check */}
+                        {statusForAction === 'processing' && (
                           <ShippingForm
                             orderId={order.id}
                             currentStatus="processing"
@@ -212,7 +205,7 @@ function SellerShippingPage() {
                           />
                         )}
                         {/* Show button for shipped orders to mark as delivered */}
-                {actionStatus === 'shipped' && order.status !== 'delivered' && (
+                {statusForAction === 'shipped' && order.status !== 'delivered' && (
                           <button
                             className="btn btn-sm btn-success"
                             onClick={() =>
@@ -250,9 +243,12 @@ function ShippingForm({ orderId, currentStatus, existingCourier = '', onUpdate }
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Only allow processing -> shipped from seller view
-    const nextStatus = 'shipped';
-    if (!trackingNumber) {
+    // pending -> processing (no tracking needed)
+    // processing -> shipped (needs tracking, courier is from existing)
+    const nextStatus = currentStatus === 'pending' ? 'processing' : 'shipped';
+    
+    // If going to shipped, require tracking number
+    if (nextStatus === 'shipped' && !trackingNumber) {
       return;
     }
     
