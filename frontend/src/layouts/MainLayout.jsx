@@ -71,7 +71,7 @@ function MainLayout() {
     <div className="d-flex flex-column min-vh-100">
       <nav className="navbar navbar-expand-lg navbar-refurbworks">
         <div className="container">
-          <Link className="navbar-brand" to="/">
+          <Link className="navbar-brand" to={isSeller ? '/seller/dashboard' : '/dashboard'}>
             RefurbWorks
           </Link>
 
@@ -126,7 +126,7 @@ function MainLayout() {
                 <div className="dropdown ms-2" ref={dropdownRef}>
                   <button
                     type="button"
-                    className="btn btn-signin dropdown-toggle d-flex align-items-center"
+                    className="btn btn-signin dropdown-toggle d-flex align-items-center shadow-none"
                     onClick={() => setMenuOpen((prev) => !prev)}
                   >
                     <img
@@ -251,16 +251,6 @@ function MainLayout() {
                           >
                             <i className="bi bi-box-seam me-2" />
                             My Orders
-                          </Link>
-                        </li>
-                        <li>
-                          <Link
-                            className="dropdown-item"
-                            to="/shipping"
-                            onClick={() => setMenuOpen(false)}
-                          >
-                            <i className="bi bi-truck me-2" />
-                            Track Order
                           </Link>
                         </li>
                         <li>
