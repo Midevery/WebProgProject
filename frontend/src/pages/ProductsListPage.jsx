@@ -11,6 +11,7 @@ function ProductsListPage() {
   const [sellerInput, setSellerInput] = useState('');
   const [minPriceInput, setMinPriceInput] = useState('');
   const [maxPriceInput, setMaxPriceInput] = useState('');
+  const [pagination, setPagination] = useState(null);
 
   const availability = searchParams.get('availability') || '';
   const min_price = searchParams.get('min_price') || '';
@@ -21,11 +22,21 @@ function ProductsListPage() {
     async function load() {
       setLoading(true);
       try {
+        const paramsObj = {};
+        searchParams.forEach((value, key) => {
+          if (key === 'categories[]') {
+            if (!paramsObj[key]) paramsObj[key] = [];
+            paramsObj[key].push(value);
+          } else {
+            paramsObj[key] = value;
+          }
+        });
         const res = await api.get('/products', {
-          params: Object.fromEntries(searchParams.entries()),
+          params: paramsObj,
         });
         setProducts(res.data.products?.data || []);
         setCategories(res.data.categories || []);
+        setPagination(res.data.products || null);
       } finally {
         setLoading(false);
       }
@@ -41,6 +52,17 @@ function ProductsListPage() {
     if (value) next.set(key, value);
     else next.delete(key);
     setSearchParams(next);
+  };
+
+  const handlePageChange = (page) => {
+    const next = new URLSearchParams(searchParams);
+    if (page <= 1) {
+      next.delete('page');
+    } else {
+      next.set('page', page);
+    }
+    setSearchParams(next);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (loading) {
@@ -104,6 +126,44 @@ function ProductsListPage() {
               </div>
             ))}
           </div>
+          {pagination && pagination.last_page > 1 && (
+            <nav className="d-flex justify-content-center mt-4">
+              <ul className="pagination">
+                <li className={`page-item ${pagination.current_page === 1 ? 'disabled' : ''}`}>
+                  <button
+                    className="page-link"
+                    onClick={() => handlePageChange(pagination.current_page - 1)}
+                    disabled={pagination.current_page === 1}
+                  >
+                    Previous
+                  </button>
+                </li>
+                {Array.from({ length: pagination.last_page }, (_, idx) => idx + 1).map((page) => (
+                  <li
+                    key={page}
+                    className={`page-item ${pagination.current_page === page ? 'active' : ''}`}
+                  >
+                    <button className="page-link" onClick={() => handlePageChange(page)}>
+                      {page}
+                    </button>
+                  </li>
+                ))}
+                <li
+                  className={`page-item ${
+                    pagination.current_page === pagination.last_page ? 'disabled' : ''
+                  }`}
+                >
+                  <button
+                    className="page-link"
+                    onClick={() => handlePageChange(pagination.current_page + 1)}
+                    disabled={pagination.current_page === pagination.last_page}
+                  >
+                    Next
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          )}
         </div>
 
         <div className="col-lg-3">

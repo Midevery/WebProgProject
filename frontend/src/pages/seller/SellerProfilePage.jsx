@@ -151,11 +151,10 @@ function SellerProfilePage() {
                     <td>
                       <div className="d-flex align-items-center">
                         <img
-                          src={
-                            product.image
-                              ? `/${product.image}`
-                              : `https://picsum.photos/60/60?random=${product.id}`
-                          }
+                          src={resolveImageUrl(
+                            product.image,
+                            `https://picsum.photos/60/60?random=${product.id}`,
+                          )}
                           alt={product.name}
                           className="product-image-small me-3"
                           onError={(e) => {

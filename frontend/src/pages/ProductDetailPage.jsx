@@ -175,7 +175,7 @@ function ProductDetailPage() {
               >
                 {product.stock > 0 ? 'Ready Stock' : 'Pre-Order'}
               </span>
-              <h2>{product.name}</h2>
+              <h2 className="fw-bold">{product.name}</h2>
               {product.category && (
                 <p className="text-muted">Category: {product.category.name}</p>
               )}
@@ -189,8 +189,8 @@ function ProductDetailPage() {
                   <p className="text-muted">{product.description}</p>
                 </div>
               )}
-              <h3 className="product-price mb-4">
-                IDR {product.price?.toLocaleString('id-ID')}
+              <h3 className="product-price mb-4 fw-bold">
+                IDR {Number(product.price || 0).toLocaleString('id-ID')}
               </h3>
 
               <div className="mb-3" style={{ maxWidth: 200 }}>
@@ -283,9 +283,9 @@ function ProductDetailPage() {
                       />
                     </div>
                     <div className="p-2">
-                      <h6 className="mb-1 small">{item.name}</h6>
-                      <p className="product-price mb-0 small">
-                        IDR {item.price?.toLocaleString('id-ID')}
+                      <h6 className="mb-1 fw-semibold">{item.name}</h6>
+                      <p className="product-price mb-0 fw-semibold">
+                        IDR {Number(item.price || 0).toLocaleString('id-ID')}
                       </p>
                     </div>
                   </button>
@@ -322,9 +322,9 @@ function ProductDetailPage() {
                       />
                     </div>
                     <div className="p-2">
-                      <h6 className="mb-1 small">{item.name}</h6>
-                      <p className="product-price mb-0 small">
-                        IDR {item.price?.toLocaleString('id-ID')}
+                      <h6 className="mb-1 fw-semibold">{item.name}</h6>
+                      <p className="product-price mb-0 fw-semibold">
+                        IDR {Number(item.price || 0).toLocaleString('id-ID')}
                       </p>
                     </div>
                   </button>
