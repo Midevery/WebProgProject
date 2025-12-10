@@ -72,7 +72,7 @@ function WishlistPage() {
       <div className="row g-4">
         {items.map((item) => (
           <div key={item.id} className="col-12 col-md-4 col-lg-3">
-            <div className="product-card h-100">
+            <div className="product-card h-100 shadow">
               <Link
                 to={`/products/${item.product.id}`}
                 className="text-decoration-none text-dark"
