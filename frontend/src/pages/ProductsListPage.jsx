@@ -75,10 +75,9 @@ function ProductsListPage() {
 
   return (
     <div className="container my-4">
-      <h2 className="mb-4">Display All Product</h2>
       <div className="row">
         <div className="col-lg-9">
-          <h3 className="section-title mb-4">Our Products</h3>
+          <h1 className="section-title mb-4">Our Products</h1>
           <div className="row g-4">
             {products.length === 0 && (
               <div className="col-12">

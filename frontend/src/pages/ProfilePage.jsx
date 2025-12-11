@@ -164,6 +164,13 @@ function ProfilePage() {
     e.preventDefault();
     setPasswordSubmitting(true);
     setPasswordError('');
+
+    if (passwordForm.password !== passwordForm.password_confirmation) {
+      setPasswordError('New password and confirmation do not match.');
+      setPasswordSubmitting(false);
+      return;
+    }
+
     try {
       await api.put('/me/password', passwordForm);
       setPasswordForm({

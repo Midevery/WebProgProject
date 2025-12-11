@@ -48,7 +48,6 @@ function SignInPage() {
   };
 
   return (
-    <div className="auth-hero">
       <div className="container">
         <div className="row justify-content-center align-items-center min-vh-100">
           <div className="col-lg-6 d-flex justify-content-center">
@@ -115,7 +114,6 @@ function SignInPage() {
           </div>
         </div>
       </div>
-    </div>
   );
 }
 
