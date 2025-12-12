@@ -454,6 +454,21 @@ body {
   margin-bottom: 1rem;
 }
 
+.stat-card-clickable {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card-clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.stat-card-clickable:focus-visible {
+  outline: 3px solid #2E7D32;
+  outline-offset: 2px;
+}
+
 .stat-card-warm {
   background: linear-gradient(135deg, #ffe0b2 0%, #ffcc80 100%);
 }
@@ -505,6 +520,10 @@ body {
   border-radius: 5px;
   font-size: 0.75rem;
   font-weight: 600;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .badge-in-stock {
