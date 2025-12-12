@@ -8,6 +8,10 @@ function SellerDashboardPage() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const goToOrders = () => {
+    navigate('/seller/shipping');
+  };
+
   useEffect(() => {
     async function load() {
       setLoading(true);
@@ -110,7 +114,18 @@ function SellerDashboardPage() {
 
       <div className="row mb-4">
         <div className="col-md-3 mb-3">
-          <div className="stat-card">
+          <div
+            className="stat-card stat-card-clickable"
+            role="button"
+            tabIndex={0}
+            onClick={goToOrders}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                goToOrders();
+              }
+            }}
+          >
             <div className="stat-value">{totalOrders}</div>
             <div className="stat-label">Total Orders</div>
           </div>
