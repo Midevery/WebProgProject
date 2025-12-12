@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -59,12 +60,10 @@ class SellerController extends Controller
         })
         ->sum('subtotal');
 
-        $totalOrders = OrderItem::whereHas('product', function($query) use ($seller) {
+        $totalOrders = Order::whereHas('orderItems.product', function($query) use ($seller) {
             $query->where('seller_id', $seller->id);
         })
-        ->whereHas('order', function($query) {
-            $query->where('status', '!=', 'cancelled');
-        })
+        ->where('status', '!=', 'cancelled')
         ->count();
         
         $totalItemsSold = OrderItem::whereHas('product', function($query) use ($seller) {
