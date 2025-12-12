@@ -85,7 +85,7 @@ function DashboardPage() {
   }
 
   return (
-    <div className="container-fluid my-4">
+    <div className="container my-4">
       <div className="row">
         <div className="col-md-3 mb-4">
           <div className="card mb-3 dashboard-card">
@@ -179,7 +179,7 @@ function DashboardPage() {
               <div className="row g-3">
                 {recommendedProducts.map((product) => (
                   <div key={product.id} className="col-6 col-md-3">
-                    <div className="product-card">
+                    <div className="product-card shadow">
                       <Link
                         to={`/products/${product.id}`}
                         className="text-decoration-none text-dark"
@@ -402,7 +402,8 @@ function DashboardPage() {
                                     order.status === 'delivered'
                                       ? 'success'
                                       : order.status === 'cancelled'
-                                        ? 'danger'
+                                        ? 'danger' : order.status === 'shipped'
+                                        ? 'info'
                                         : 'warning'
                                   }`}
                                 >
