@@ -164,7 +164,7 @@ function PaymentDetailPage() {
                 checked={paymentMethod === 'transfer'}
                 onChange={() => setPaymentMethod('transfer')}
               />
-              <label className="btn btn-outline-primary" htmlFor="transfer">
+              <label className={`btn ${paymentMethod === 'transfer' ? 'btn-primary' : 'btn-outline-primary'}`} htmlFor="transfer">
                 Transfer
               </label>
 
@@ -177,7 +177,7 @@ function PaymentDetailPage() {
                 checked={paymentMethod === 'cash'}
                 onChange={() => setPaymentMethod('cash')}
               />
-              <label className="btn btn-outline-primary" htmlFor="cash">
+              <label className={`btn ${paymentMethod === 'cash' ? 'btn-primary' : 'btn-outline-primary'}`} htmlFor="cash">
                 Cash
               </label>
             </div>
