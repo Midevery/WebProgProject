@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
+  baseURL: 'https://web-prog-project-git-prod-mideverys-projects.vercel.app/api',
   withCredentials: true,
 });
 

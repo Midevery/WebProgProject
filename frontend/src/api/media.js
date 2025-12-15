@@ -1,8 +1,8 @@
 import axios from 'axios';
-const backendDomain = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+const backendDomain = 'https://web-prog-project-git-prod-mideverys-projects.vercel.app';
 
 export const api = axios.create({
-  baseURL: `${backendDomain}/api`, 
+  baseURL: `${backendDomain}/api`,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
