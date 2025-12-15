@@ -148,20 +148,23 @@ class AuthController extends Controller
             'password' => $request->password,
         ];
 
-        if (Auth::attempt($credentials, $request->filled('remember'))) {
-            $request->session()->regenerate();
-
-            $user = Auth::user();
-
+        if (!Auth::attempt($credentials)) {
             return response()->json([
-                'message' => 'Signed in successfully.',
-                'user' => $user,
-            ]);
+                'message' => 'Invalid login details'
+            ], 401);
         }
 
+        $user = User::where($loginField, $request->login)->firstOrFail();
+
+        $user->tokens()->delete(); 
+        $token = $user->createToken('auth_token')->plainTextToken;
+
         return response()->json([
-            'message' => 'The provided credentials do not match our records.',
-        ], 422);
+            'message' => 'Login success',
+            'access_token' => $token, 
+            'token_type' => 'Bearer',
+            'user' => $user,
+        ]);
     }
 
     public function apiSignUp(Request $request)
@@ -172,14 +175,10 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => ['required', 'confirmed', Password::defaults()],
             'role' => 'required|in:customer,seller',
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string',
-            'date_of_birth' => 'nullable|date|before:today',
-            'gender' => 'nullable|in:Male,Female',
-            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'phone' => 'nullable|string|max:20', 
         ]);
 
-        $userData = [
+        $user = User::create([
             'username' => $request->username,
             'name' => $request->name,
             'email' => $request->email,
@@ -187,43 +186,25 @@ class AuthController extends Controller
             'role' => $request->role,
             'phone' => $request->phone,
             'address' => $request->address,
-            'date_of_birth' => $request->date_of_birth,
-            'gender' => $request->gender,
-        ];
+        ]);
 
-        if ($request->hasFile('profile_image')) {
-            $uploadPath = public_path('images/profiles');
-            if (!file_exists($uploadPath)) {
-                mkdir($uploadPath, 0755, true);
-            }
-
-            $image = $request->file('profile_image');
-            $imageName = time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
-            $image->move($uploadPath, $imageName);
-
-            $userData['profile_image'] = 'images/profiles/' . $imageName;
-        }
-
-        $user = User::create($userData);
-        Auth::login($user);
-        $request->session()->regenerate();
+        // Langsung buat token saat register
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Signed up successfully.',
+            'message' => 'User created successfully',
+            'access_token' => $token, 
+            'token_type' => 'Bearer',
             'user' => $user,
-            'redirect' => $user->isSeller() ? route('seller.dashboard') : route('customer.dashboard'),
         ], 201);
     }
 
     public function apiSignOut(Request $request)
     {
-        Auth::logout();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $request->user()->currentAccessToken()->delete();
 
         return response()->json([
-            'message' => 'Signed out successfully.',
+            'message' => 'Logged out successfully'
         ]);
     }
 }
