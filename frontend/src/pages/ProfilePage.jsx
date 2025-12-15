@@ -133,14 +133,17 @@ function ProfilePage() {
         date_of_birth: formData.get('date_of_birth'),
         has_image: !!formData.get('profile_image'),
       });
-      const res = await api.post('/me', formData);
+      const res = await api.post('/me', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data', 
+        },
+      });
       const updatedUser = res.data.user;
       setUser(updatedUser);
       setProfileImageFile(null);
       setProfilePreview(buildProfilePreview(updatedUser.profile_image, updatedUser.id, true));
       setSuccess('Profile updated successfully!');
       
-      // Trigger user refresh in MainLayout
       window.dispatchEvent(new CustomEvent('userUpdated', { detail: updatedUser }));
       
       setTimeout(() => setSuccess(''), 3000);
