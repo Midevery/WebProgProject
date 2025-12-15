@@ -1,12 +1,20 @@
-const backendBaseUrl =
-  import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:8000';
+import axios from 'axios';
+const backendDomain = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+
+export const api = axios.create({
+  baseURL: `${backendDomain}/api`, 
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  },
+});
 
 export const resolveImageUrl = (path, fallback) => {
   if (!path) return fallback;
   if (path.startsWith('http://') || path.startsWith('https://')) {
     return path;
   }
-  return `${backendBaseUrl}/${path.replace(/^\/+/, '')}`;
+  const cleanPath = path.replace(/^\/+/, '');
+  return `${backendDomain}/${cleanPath}`;
 };
-
-
