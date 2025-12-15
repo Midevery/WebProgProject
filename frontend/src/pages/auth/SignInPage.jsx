@@ -26,10 +26,15 @@ function SignInPage() {
     setLoading(true);
     try {
       const res = await api.post('/auth/signin', form);
-      const role = res.data?.user?.role;
+      const token = res.data.access_token;
+      const user = res.data.user;
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      const role = user?.role;
       const allowedRoles = ['seller', 'customer'];
       if (!allowedRoles.includes(role)) {
         setError('Admin access is disabled.');
+        localStorage.removeItem('token');
         return;
       }
       if (role === 'seller') {

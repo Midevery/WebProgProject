@@ -53,6 +53,12 @@ export default function SignUpPage() {
       if (form.gender) formData.append('gender', form.gender);
 
       const res = await api.post('/auth/signup', formData);
+
+      if (res.data?.access_token) {
+          localStorage.setItem('token', res.data.access_token);
+          localStorage.setItem('user', JSON.stringify(res.data.user));
+      }
+      
       const role = res.data?.user?.role;
 
       if (role === 'seller') {
