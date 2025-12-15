@@ -14,21 +14,20 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\SellerController;
 use App\Http\Controllers\SellerShippingController;
 
-
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
-Route::middleware('web')->group(function () {
-    Route::post('/auth/signin', [AuthController::class, 'apiSignIn']);
-    Route::post('/auth/signup', [AuthController::class, 'apiSignUp']);
-    Route::post('/auth/signout', [AuthController::class, 'apiSignOut'])->middleware('auth');
-});
+Route::post('/auth/signin', [AuthController::class, 'apiSignIn']);
+Route::post('/auth/signup', [AuthController::class, 'apiSignUp']);
 
 Route::get('/products', [ProductController::class, 'apiIndex']);
 Route::get('/products/{id}', [ProductController::class, 'apiShow']);
 
-Route::middleware(['web', 'auth'])->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
+    
+    Route::post('/auth/signout', [AuthController::class, 'apiSignOut']);
+
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+    
     Route::get('/me', [ProfileController::class, 'apiMe']);
     Route::put('/me', [ProfileController::class, 'apiUpdate']);
     Route::put('/me/password', [ProfileController::class, 'apiUpdatePassword']);
@@ -70,5 +69,3 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::put('/shipping/{orderId}/status', [SellerShippingController::class, 'updateStatus']);
     });
 });
-
-
