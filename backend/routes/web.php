@@ -72,8 +72,3 @@ Route::middleware(['auth'])->prefix('seller')->name('seller.')->group(function (
 });
 
 Route::get('/seller/{id}', [SellerController::class, 'show'])->name('seller.show')->where('id', '[0-9]+');
-
-Route::get('/run-migration', function () {
-    Artisan::call('migrate:fresh --seed --force');
-    return 'BERHASIL! Database sudah di-reset dan di-isi data baru. Silakan cek Login sekarang.';
-});
