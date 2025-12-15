@@ -5,7 +5,10 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:5173'],
+    'allowed_origins' => [
+        'http://localhost:5173',
+        'https://web-prog-project-u6ly.vercel.app',
+    ],
 
     'allowed_origins_patterns' => [],
 
@@ -17,5 +20,3 @@ return [
 
     'supports_credentials' => true,
 ];
-
-
