@@ -191,7 +191,7 @@ class CompleteDataSeeder extends Seeder
         }
 
         for ($i = 0; $i < 20; $i++) {
-            Wishlist::create([
+            Wishlist::firstOrCreate([
                 'user_id' => fake()->randomElement($customers)->id,
                 'product_id' => fake()->randomElement($products)->id,
             ]);
