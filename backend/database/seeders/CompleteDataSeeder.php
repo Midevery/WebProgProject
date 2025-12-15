@@ -15,7 +15,7 @@ use App\Models\Comment;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
-class TechMarketSeeder extends Seeder
+class CompleteDataSeeder extends Seeder
 {
     public function run(): void
     {
