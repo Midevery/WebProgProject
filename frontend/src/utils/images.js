@@ -1,5 +1,5 @@
 const backendBaseUrl =
-  import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '') || 'https://web-prog-project-git-prod-mideverys-projects.vercel.app';
+  import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '') || 'https://webprogproject.onrender.com';
 
 export function resolveImageUrl(path, fallback) {
   if (!path) return fallback;

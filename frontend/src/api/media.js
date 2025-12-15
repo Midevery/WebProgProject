@@ -1,5 +1,5 @@
 import axios from 'axios';
-const backendDomain = 'https://web-prog-project-git-prod-mideverys-projects.vercel.app';
+const backendDomain = 'https://webprogproject.onrender.com';
 
 export const api = axios.create({
   baseURL: `${backendDomain}/api`,
