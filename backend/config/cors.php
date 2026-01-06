@@ -8,6 +8,7 @@ return [
     'allowed_origins' => [
         'http://localhost:5173',
         'https://web-prog-project-u6ly.vercel.app',
+        'https://web-prog-project-u6ly-git-prod-mideverys-projects.vercel.app'
     ],
 
     'allowed_origins_patterns' => [],
