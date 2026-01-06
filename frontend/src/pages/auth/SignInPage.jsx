@@ -27,11 +27,6 @@ function SignInPage() {
     try {
       const res = await api.post('/auth/signin', form);
       const role = res.data?.user?.role;
-      const allowedRoles = ['seller', 'customer'];
-      if (!allowedRoles.includes(role)) {
-        setError('Admin access is disabled.');
-        return;
-      }
       if (role === 'seller') {
         navigate('/seller/dashboard');
       } else {

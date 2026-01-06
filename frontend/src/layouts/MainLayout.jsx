@@ -57,7 +57,7 @@ function MainLayout() {
     try {
       await api.post('/auth/signout');
     } catch {
-      /* ignore */
+      
     }
     setUser(null);
     await refreshCartCount();

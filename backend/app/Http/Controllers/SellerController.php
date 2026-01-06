@@ -214,7 +214,6 @@ class SellerController extends Controller
             ]);
         }
 
-        // Using JSX frontend - return JSON
         return response()->json([
             'seller' => $seller,
             'products' => $products,
